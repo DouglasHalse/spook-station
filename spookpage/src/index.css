@@ -1,0 +1,97 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+
+.buttonfirst {                                 
+  background-color: #4CAF50; /* Green */       
+  border: none;   
+  color: white;                                
+  padding: 16px 32px;                          
+  text-align: center;                          
+  text-decoration: none;   
+  display: inline-block;                       
+  font-size: 16px;                             
+  margin: 4px 2px;                             
+  width: 135px;
+  height: 80px;                                
+  transition-duration: 0.4s;                   
+  cursor: pointer;                             
+}                                              
+                                               
+.buttonsecond {                                
+  background-color: #111222;                   
+  border: none;   
+  color: white;                                
+  padding: 16px 32px;   
+  text-align: center;
+  text-decoration: none;   
+  display: inline-block;   
+  font-size: 16px;   
+  margin: 4px 2px;   
+  width: 100px;
+  transition-duration: 0.4s;   
+  cursor: pointer;
+}
+
+.fullscreen {
+  position: fixed;
+  background-color: #000000; /* black */
+  height: 100%;
+  width: 100%;
+}
+
+.button {
+  transition-duration: 0.4s;
+}
+
+.buttongreen {
+  transition-duration: 0.4s;
+}
+
+.buttongreen:hover {
+  background-color: #FFF333; /* Green */
+  color: white;
+}
+
+.buttongrey {
+  transition-duration: 0.4s;
+}
+
+.buttongrey:hover {
+  background-color: #9CAF50; /* Green */
+  color: grey;
+}
+
+.buttonsecond:after {
+    background: #f1f1f1;   
+    opacity: 0;   
+    transition: all 0.8s
+}  
+
+.buttonsecond:active:after {   
+    padding: 0;   
+    margin: 0;   
+    opacity: 1;   
+    transition: 0s 
+}
+
+.parent1 {
+  white-space: nowrap;
+}
+
+.parent2 {
+  white-space: nowrap;
+}
+
+

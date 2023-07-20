@@ -3,6 +3,7 @@ import time
 
 class SpookStationDeviceBase():
 	def __init__(self, deviceName: str, deviceType: SpookStationDeviceType) -> None:
+		self.stateTopics = []
 		self.deviceName = deviceName
 		self.deviceType = deviceType
 		self.lastMessage = 0

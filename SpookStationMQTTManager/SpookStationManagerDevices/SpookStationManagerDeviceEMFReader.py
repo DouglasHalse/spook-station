@@ -11,9 +11,11 @@ class SpookStationManagerDeviceEMFReader(SpookStationDeviceBase):
         self.currentUseSound = False
         self.fluctuationRate = 0
         self.fluctuationMagnitude = 0
-        self.stateTopics = ["current_state", "current_use_sound"]
         self.lastGetStateTime = 0
         self.lastAlteredStateTime = 0
+        self.stateTopics = []
+        for topicSuffix in ["current_state", "current_use_sound"]:
+            self.stateTopics.append(deviceName + "/" + topicSuffix)
 
     def setCurrentState(self, state: int):
         self.currentState = state

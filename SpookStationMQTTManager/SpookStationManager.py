@@ -43,15 +43,15 @@ class SpookStationManager():
 
 	def __subscribeToTopics(self, device):
 		for topic in device.stateTopics:
-			print("Subscribing to: " + device.deviceName + "/" + topic)
+			print("Subscribing to: " + topic)
 			self.client.loop_stop()
-			self.client.subscribe(device.deviceName + "/" + topic, options=SubscribeOptions(qos=2))
+			self.client.subscribe(topic, options=SubscribeOptions(qos=2))
 			self.client.loop_start()
 
 
 	def __unSubscribeToTopics(self, device):
 		for topic in device.stateTopics:
-			self.client.unsubscribe(device.deviceName + "/" + topic)
+			self.client.unsubscribe(topic)
 
 	def __getDeviceTypeFromName(self, deviceName: str):
 		for device in self.devices:

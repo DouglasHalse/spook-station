@@ -12,7 +12,6 @@ class SpookStationManager():
 		self.useCyclicControlSignalPublishing = useCyclicControlSignalPublishing
 
 		self.client = mqtt.Client(userdata="isSpookStation")
-		self.client.on_connect = self.__on_connect
 		self.client.on_message = self.__on_message
 
 		self.client.connect_async("localhost", 1883, 60)
@@ -28,12 +27,6 @@ class SpookStationManager():
 		if self.useCyclicControlSignalPublishing:
 			threading.Timer(0.1, self.cyclicControlSignalPublishing).start()
 
-
-		
-	def __on_connect(self, client, userdata, flags, rc):
-		#print("Connected with result code: "+str(rc))
-		1+1
-	
 	def __on_message(self, client, userdata, msg):
 		deviceName, deviceTopic = msg.topic.split("/")
 
@@ -69,8 +62,8 @@ class SpookStationManager():
 	def publishControlTopics(self):
 		for device in self.devices:
 			if device.deviceType == SpookStationDeviceType.EMFReader:
-				self.client.publish(device.deviceName + "/desired_state", device.desiredState, qos=2)
-				self.client.publish(device.deviceName + "/desired_use_sound", device.desiredUseSound, qos=2)
+				self.client.publish(device.deviceName + "/desired_state", device.getDesiredState(), qos=2)
+				self.client.publish(device.deviceName + "/desired_use_sound", device.getDesiredUseSound(), qos=2)
 			else:
 				print("Unknown device type for publishing control signals: " + str(device.deviceType))
 

@@ -1,6 +1,9 @@
 import pyttsx3
 import paho.mqtt.client as mqtt
 import threading
+import numpy as np
+import sounddevice as sd
+import sys
 import sched
 import time
 
@@ -8,14 +11,20 @@ class SpiritBoxMQTTClient():
 	def __init__(self, deviceName: str):
 		self.deviceName = deviceName
 		self.engine = pyttsx3.init('espeak')
-		
+
+		self.outputStream = sd.OutputStream(callback=self.whiteNoiseCallback, channels=1)
+		self.outputStream.stop()
+		self.isTalking = False
+		self.staticVolume = 1.0
+		self.staticVolumeWhileTalking = 0.1
+
 		self.MQTTClient = mqtt.Client()
-		self.MQTTClient.connect("localhost", 1883, 60)
+		self.MQTTClient.connect("192.168.7.1", 1883, 60)
 		self.MQTTClient.on_connect = self.__on_connect
 		self.MQTTClient.on_message = self.__on_message
   
-		self.SpiritBoxStateTopics = ["/getVolume", "/getRate", "/getVoice", "/availableVoices"]
-		self.SpiritBoxControlTopics = ["/setVolume", "/setRate", "/setVoice", "/say"]
+		self.SpiritBoxStateTopics = ["/getVolume", "/getRate", "/getVoice", "/availableVoices", "/getStaticVolume", "/getStaticVolumeWhileTalking"]
+		self.SpiritBoxControlTopics = ["/setVolume", "/setRate", "/setVoice", "/say", "/setStaticVolume", "/setStaticVolumeWhileTalking"]
 
 		self.MQTTClient.loop_start()
   
@@ -28,7 +37,7 @@ class SpiritBoxMQTTClient():
 				self.availableVoices += voice.name
 
 		print("Available voices:" + self.availableVoices)
-  
+
 		self.__repeatSendingVolume()
 		self.__repeatSendingRate()
 		self.__repeatSendingAvailableVoices()
@@ -43,12 +52,20 @@ class SpiritBoxMQTTClient():
 
 		
 		
+	def whiteNoiseCallback(self, outdata, frames, time, status): 
+		if status:
+			print(status, file=sys.stderr)
+		if self.isTalking:
+			outdata[:] = np.random.rand(frames, 1)*self.staticVolumeWhileTalking
+		else:
+			outdata[:] = np.random.rand(frames, 1)*self.staticVolume
 
 
         
 	def __on_connect(self, client, userdata, flags, rc):
 		print("Connected with result code: " + str(rc) + "\n")
 		self.__subscribeToTopics()
+		self.outputStream.start()
 		
   
 	def __subscribeToTopics(self):
@@ -70,6 +87,12 @@ class SpiritBoxMQTTClient():
 			self.__setVoice(voice)
 		elif msg.topic == self.deviceName + "/say":
 			self.__say(msg.payload)
+		elif msg.topic == self.deviceName + "/setStaticVolume":
+			volume = float(msg.payload)
+			self.__setStaticVolume(volume)
+		elif msg.topic == self.deviceName + "/setStaticVolumeWhileTalking":
+			volume = float(msg.payload)
+			self.__setStaticVolumeWhileTalking(volume)
 		else:
 			print("Unknown topic: " + msg.topic)
   
@@ -88,6 +111,14 @@ class SpiritBoxMQTTClient():
 	def __repeatSendingVoice(self):
 		self.__sendVoice()
 		threading.Timer(1, self.__repeatSendingVoice).start()
+
+	def __repeatSendingStaticVolume(self):
+		self.__sendStaticVolume()
+		threading.Timer(1, self.__repeatSendingStaticVolume).start()
+
+	def __repeatSendingStaticVolumeWhileTalking(self):
+		self.__sendStaticVolumeWhileTalking()
+		threading.Timer(1, self.__repeatSendingStaticVolumeWhileTalking).start()
   
 	def __setVolume(self, volume):
 		print("Setting volume to: " + str(volume) + "\n")
@@ -100,6 +131,12 @@ class SpiritBoxMQTTClient():
 		#print("Sending current volume: " + str(self.engine.getProperty('volume')))
 		volume = self.engine.getProperty('volume')
 		self.MQTTClient.publish(self.deviceName + "/getVolume", volume)
+
+	def __sendStaticVolume(self):
+		self.MQTTClient.publish(self.deviceName + "/getStaticVolume", self.staticVolume)
+
+	def __sendStaticVolumeWhileTalking(self):
+		self.MQTTClient.publish(self.deviceName + "/getStaticVolumeWhileTalking", self.staticVolumeWhileTalking)
   
 	def __sendRate(self):
 		#print("Sending current rate: " + str(self.engine.getProperty('rate')))
@@ -122,6 +159,14 @@ class SpiritBoxMQTTClient():
 		else:
 			print("Unknown voice: " + voice)
     
+	def __setStaticVolume(self, volume):
+		print("Setting static volume to : " + str(volume))
+		self.staticVolume = volume
+
+	def __setStaticVolumeWhileTalking(self, volume):
+		print("Setting static volume while talking to : " + str(volume))
+		self.staticVolumeWhileTalking = volume
+
 	def __sendVoice(self):
 		#print("Sending current voice: " + self.engine.getProperty('voice'))
 		voice = self.engine.getProperty('voice')
@@ -132,7 +177,9 @@ class SpiritBoxMQTTClient():
 		self.MQTTClient.publish(self.deviceName + "/availableVoices", self.availableVoices)
 
 	def __say(self, text):
+		self.isTalking = True
 		print("Saying: " + text.decode('utf-8'))
 		self.engine.say(text.decode('utf-8'))
 		self.engine.runAndWait()
+		self.isTalking = False
 	

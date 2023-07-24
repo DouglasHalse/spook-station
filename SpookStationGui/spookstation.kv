@@ -1,0 +1,92 @@
+#:kivy 2.1.0
+
+<BaseDeviceInfoLableWidget>:
+    Label:
+        id: deviceName
+        text: 'deviceName' 
+
+<BaseDeviceConnectionIndicatorWidget>:
+    canvas:
+        Color:
+            id: color
+            rgba: 0,0,1,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<BaseDeviceInfoWidget>:
+    id: info_box
+    orientation: 'vertical'
+    size_hint: (None, 1)
+    width: '96dp'
+
+<DeviceRowWidget>:
+    orientation: 'horizontal'
+    size_hint_min: (1, 0.7)
+    size_hint: (1, None)
+    height: '96dp'
+    canvas:
+        Color:
+            rgba: 0.5, 0.0, 0, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<SpookStationWidget>:
+    orientation: "vertical"
+    BoxLayout:
+    
+        canvas:
+            Color:
+                rgba: .4, .7, .95, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        orientation: "horizontal"
+        size_hint: 1, None
+        height: '48dp'
+        Image:
+            id: icon_1
+            width: '48dp'
+            size_hint_x: None
+            source: 'fisk.png'
+            color: 'red'
+        Image:
+            id: icon_2
+            width: '48dp'
+            size_hint_x: None
+            source: 'spook.png'
+            color: 'green'
+        Image:
+            id: icon_3
+            width: '48dp'
+            size_hint_x: None
+            source: 'fisk.png'
+            color: 'white'
+    GridLayout:
+        id: deviceList
+        cols: 1
+        spacing: 10
+        size_hint:(1,1)
+        canvas:
+            Color:
+                rgba: 0, 0.3, 0, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+    # ScrollView:
+    #     size_hint: (1, 1)
+    #     orientation: "vertical"
+    #     do_scroll_x: False
+    #     do_scroll_y: True
+    #     BoxLayout:
+    #         canvas:
+    #             Color:
+    #                 rgba: 0.67, 0.53, 0.8, 1
+    #             Rectangle:
+    #                 pos: self.pos
+    #                 size: self.size
+    #         id: deviceList
+    #         orientation: "vertical"
+    #         size_hint: (1, None)
+    #         height: self.minimum_height

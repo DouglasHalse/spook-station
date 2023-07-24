@@ -1,3 +1,6 @@
+import sys
+sys.path.append('D:/spook-station/SpookStationMQTTManager')
+
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -5,25 +8,43 @@ from kivy.config import Config
 Config.set('graphics', 'width', '800')
 Config.set('graphics', 'height', '480')
 
+from SpookStationManager import SpookStationManager
+from SpookStationManagerEnums import SpookStationDeviceType, SpookStationDeviceConnectionState
+
 from enum import Enum
 
-class FunctionButton(Button):
-    def SetFunction(self, function):
-        self.on_press = function
-        self.text = function.__name__
+deviceManager = SpookStationManager()
 
-def GetNewFunctionButton():
-    new_button = FunctionButton()
-    return new_button   
+class EMFReaderWidget(BoxLayout):
+    def __init__(self, deviceName, **kwargs):
+        super().__init__(**kwargs)
+        self.deviceName = deviceName
+        for led in range(1, 5):
+            self.ids['led' + str(led)].canvas.opacity = .5
 
-input_types = {
-    'button': GetNewFunctionButton
-}
+    def OnLedNumChanged(self, numLed):
+        numLed = int(numLed)
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredState(numLed)
+        self.SetLedState(numLed)
 
-class ConnectionState(Enum):
-    DISCONNECTED = 0
-    POOR_CONNECTION = 1
-    CONNECTED = 2
+    def SetLedState(self, ledState):
+        for led in range(1, 5):
+            self.ids['led' + str(led)].canvas.opacity = 1 if  led <= ledState else  .5
+
+    def OnFluctuationMagnitudeChanged(self, magnitude):
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationMagnitude(magnitude)
+        print("Magnitude set to " + str(magnitude))
+
+    def OnFluctuationRateChanged(self, rate):
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationRate(rate)
+        print("Rate set to " + str(rate))
+
+class GenericDeviceWidget(BoxLayout):
+    def __init__(self, deviceType : SpookStationDeviceType, deviceName,  **kwargs):
+        super().__init__(**kwargs)
+        match deviceType:
+            case SpookStationDeviceType.EMFReader:
+                self.add_widget(EMFReaderWidget(deviceName=deviceName))
 
 class BaseDeviceInfoLableWidget(BoxLayout):
     def __init__(self, deviceName : str, **kwargs):
@@ -34,13 +55,13 @@ class BaseDeviceConnectionIndicatorWidget(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
-    def SetColor(self, state : ConnectionState):
+    def SetColor(self, state : SpookStationDeviceConnectionState):
         match state:
-            case ConnectionState.DISCONNECTED:
+            case SpookStationDeviceConnectionState.Disconnected:
                 self.ids.color.rgba = 1,0,0,1
-            case ConnectionState.POOR_CONNECTION:
+            case SpookStationDeviceConnectionState.PoorConnection:
                 self.ids.color.rgba = 1,1,0,1
-            case ConnectionState.CONNECTED:
+            case SpookStationDeviceConnectionState.Connected:
                 self.ids.color.rgba = 0,1,0,1
 
 class BaseDeviceInfoWidget(BoxLayout):
@@ -50,14 +71,10 @@ class BaseDeviceInfoWidget(BoxLayout):
         self.add_widget(BaseDeviceConnectionIndicatorWidget())
 
 class DeviceRowWidget(BoxLayout):
-    def __init__(self, deviceName : str, **kwargs):
+    def __init__(self, deviceType : SpookStationDeviceType, deviceName : str = "", **kwargs):
         super().__init__(**kwargs)
         self.add_widget(BaseDeviceInfoWidget(deviceName=deviceName))
-
-    def AddInput(self, input):
-        new_input = input_types[input['input_type']]()
-        new_input.SetFunction(input['function'])
-        self.add_widget(new_input)
+        self.add_widget(GenericDeviceWidget(deviceType=deviceType, deviceName=deviceName))
 
     def Remove(self):
         self.parent.remove_widget(self)
@@ -65,13 +82,11 @@ class DeviceRowWidget(BoxLayout):
 class SpookStationWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(SpookStationWidget, self).__init__(**kwargs)
-        self.AddNewDeviceInfoWidget("EMF_READER_1")
-        self.AddNewDeviceInfoWidget("EMF_READER_2")
-        self.AddNewDeviceInfoWidget("EMF_READER_3")
-        self.AddNewDeviceInfoWidget("EMF_READER_4")
+        self.AddNewDeviceInfoWidget(deviceType=SpookStationDeviceType.EMFReader, deviceName= "EMFReader1")
+        deviceManager.addDevice("EMFReader1", SpookStationDeviceType.EMFReader)
 
-    def AddNewDeviceInfoWidget(self, deviceName):
-        newDeviceRowWidget = DeviceRowWidget(deviceName=deviceName)
+    def AddNewDeviceInfoWidget(self, deviceType, deviceName):
+        newDeviceRowWidget = DeviceRowWidget(deviceType=deviceType, deviceName=deviceName)
         self.ids.deviceList.add_widget(newDeviceRowWidget)
 
 class SpookStationApp(App):

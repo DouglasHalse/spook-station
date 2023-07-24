@@ -1,5 +1,126 @@
 #:kivy 2.1.0
 
+<EMFReaderWidget>:
+    size_hint: (1,1)
+    BoxLayout:
+        id: ledbox
+        orientation: 'vertical'
+        size_hint: (.7, 1)
+        BoxLayout:
+            id: ledIndicator
+            orientation: 'horizontal'
+            size_hint: (1, .5)
+            canvas:
+                Color:
+                    rgba: 0, 0, 0, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            BoxLayout:
+                id: led0
+                canvas:
+                    Color:
+                        rgba: 0, 1, 0, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+            BoxLayout:
+                id: led1
+                canvas:
+                    Color:
+                        rgba: 0, 1, 0, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+            BoxLayout:
+                id: led2
+                canvas:
+                    Color:
+                        rgba: 1, 1, 0, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+            BoxLayout:
+                id: led3
+                canvas:
+                    Color:
+                        rgba: 1, 0, 0, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+            BoxLayout:
+                id: led4
+                canvas:
+                    Color:
+                        rgba: 1, 0, 0, 1
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+        Slider:
+            id: ledSlider
+            size_hint: 1, .5
+            padding: (self.width * .2) * 0.5
+            max: 4
+            value: 0
+            step: 1
+            on_value: root.OnLedNumChanged(self.value)
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: (.3, 1)
+        padding: 10
+        spacing: 5
+        BoxLayout:
+            size_hint: (1,1)
+            orientation: 'horizontal'
+            valign: 'right'
+            BoxLayout:
+                size_hint: (.7, 1)
+            Button:
+                text: 'Mute'
+                size_hint: (.3, 1)
+        BoxLayout:
+            size_hint: (1,1)
+            orientation: 'horizontal'
+            ToggleButton:
+                text: '0'
+                group: 'fluctuationMagnitudeButton'
+                state: 'down'
+                allow_no_selection: False
+                on_press: root.OnFluctuationMagnitudeChanged(0)
+            ToggleButton:
+                text: '1'
+                group: 'fluctuationMagnitudeButton'
+                allow_no_selection: False
+                on_press: root.OnFluctuationMagnitudeChanged(1)
+            ToggleButton:
+                text: '2'
+                group: 'fluctuationMagnitudeButton'
+                allow_no_selection: False
+                on_press: root.OnFluctuationMagnitudeChanged(2)
+        BoxLayout:
+            size_hint: (1,1)
+            orientation: 'horizontal'
+            ToggleButton:
+                text: 'L'
+                group: 'fluctuationRateButton'
+                state: 'down'
+                allow_no_selection: False
+                on_press: root.OnFluctuationRateChanged(0)
+            ToggleButton:
+                text: 'M'
+                group: 'fluctuationRateButton'
+                allow_no_selection: False
+                on_press: root.OnFluctuationRateChanged(1)
+            ToggleButton:
+                text: 'H'
+                group: 'fluctuationRateButton'
+                allow_no_selection: False
+                on_press: root.OnFluctuationRateChanged(2)
+            
+
+<GenericDeviceWidget>:
+    size_hint: (1,1)
+
 <BaseDeviceInfoLableWidget>:
     Label:
         id: deviceName
@@ -27,7 +148,7 @@
     height: '96dp'
     canvas:
         Color:
-            rgba: 0.5, 0.0, 0, 1
+            rgba: 0.2, 0.2, 0.2, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -35,7 +156,6 @@
 <SpookStationWidget>:
     orientation: "vertical"
     BoxLayout:
-    
         canvas:
             Color:
                 rgba: .4, .7, .95, 1

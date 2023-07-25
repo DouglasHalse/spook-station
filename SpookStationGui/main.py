@@ -1,5 +1,6 @@
 import sys
 sys.path.append('D:/spook-station/SpookStationMQTTManager')
+sys.path.append('/home/pi/spook-station/SpookStationMQTTManager')
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -42,9 +43,8 @@ class EMFReaderWidget(BoxLayout):
 class GenericDeviceWidget(BoxLayout):
     def __init__(self, deviceType : SpookStationDeviceType, deviceName,  **kwargs):
         super().__init__(**kwargs)
-        match deviceType:
-            case SpookStationDeviceType.EMFReader:
-                self.add_widget(EMFReaderWidget(deviceName=deviceName))
+        if deviceType == SpookStationDeviceType.EMFReader:
+            self.add_widget(EMFReaderWidget(deviceName=deviceName))
 
 class BaseDeviceInfoLableWidget(BoxLayout):
     def __init__(self, deviceName : str, **kwargs):
@@ -56,13 +56,14 @@ class BaseDeviceConnectionIndicatorWidget(BoxLayout):
         super().__init__(**kwargs)
         
     def SetColor(self, state : SpookStationDeviceConnectionState):
-        match state:
-            case SpookStationDeviceConnectionState.Disconnected:
-                self.ids.color.rgba = 1,0,0,1
-            case SpookStationDeviceConnectionState.PoorConnection:
-                self.ids.color.rgba = 1,1,0,1
-            case SpookStationDeviceConnectionState.Connected:
-                self.ids.color.rgba = 0,1,0,1
+        if state == SpookStationDeviceConnectionState.Disconnected:
+            self.ids.color.rgba = 1,0,0,1
+        elif state == SpookStationDeviceConnectionState.PoorConnection:
+            self.ids.color.rgba = 1,1,0,1
+        elif state == SpookStationDeviceConnectionState.Connected:
+            self.ids.color.rgba = 0,1,0,1
+        else:
+            print("Unsupported Device state: " + state)
 
 class BaseDeviceInfoWidget(BoxLayout):
     def __init__(self, deviceName : str, **kwargs):

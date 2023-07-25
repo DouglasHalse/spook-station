@@ -1,6 +1,5 @@
-import sys
-sys.path.append('D:/spook-station/SpookStationMQTTManager')
-sys.path.append('/home/pi/spook-station/SpookStationMQTTManager')
+import sys, os
+sys.path.append(os.path.join(sys.path[0], '..', 'SpookStationMQTTManager'))
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout

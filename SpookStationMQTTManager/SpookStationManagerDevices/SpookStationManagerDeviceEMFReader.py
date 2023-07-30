@@ -1,14 +1,16 @@
 from SpookStationManagerEnums import SpookStationDeviceType
 from SpookStationManagerDevices.SpookStationManagerDeviceBase import SpookStationDeviceBase
-import random, time
+import random, time, threading
 
 class SpookStationManagerDeviceEMFReader(SpookStationDeviceBase):
     def __init__(self, deviceName: str) -> None:
         super().__init__(deviceName, SpookStationDeviceType.EMFReader)
         self.desiredState = 0
         self.currentState = 0
+        self.currentStateChangeCallback = None
         self.desiredUseSound = False
         self.currentUseSound = False
+        self.currentUseSoundChangeCallback = None
         self.fluctuationRate = 0
         self.fluctuationMagnitude = 0
         self.lastGetStateTime = 0
@@ -17,7 +19,15 @@ class SpookStationManagerDeviceEMFReader(SpookStationDeviceBase):
         for topicSuffix in ["current_state", "current_use_sound"]:
             self.stateTopics.append(deviceName + "/" + topicSuffix)
 
+    def setOnStateChangeCallback(self, callbackFunction: callable):
+        self.currentStateChangeCallback = callbackFunction
+
+    def setOnUseSoundChangeCallback(self, callbackFunction: callable):
+        self.currentUseSoundChangeCallback = callbackFunction
+
     def setCurrentState(self, state: int):
+        if self.currentStateChangeCallback != None and self.currentState != state:
+            self.currentStateChangeCallback(state)
         self.currentState = state
 
     def getCurrentState(self) -> int:
@@ -38,6 +48,8 @@ class SpookStationManagerDeviceEMFReader(SpookStationDeviceBase):
         return self.desiredState
     
     def setCurrentUseSound(self, useSound: bool):
+        if self.currentUseSoundChangeCallback != None and self.currentUseSound != useSound:
+            self.currentUseSoundChangeCallback(useSound)
         self.currentUseSound = useSound
 
     def getCurrentUseSound(self) -> bool:

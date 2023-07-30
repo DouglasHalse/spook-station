@@ -93,7 +93,9 @@
             BoxLayout:
                 size_hint: (.7, 1)
             Button:
+                id: muteButton
                 text: 'Mute'
+                on_press: root.onMuteButtonChange()
                 size_hint: (.3, 1)
         BoxLayout:
             size_hint: (1,1)

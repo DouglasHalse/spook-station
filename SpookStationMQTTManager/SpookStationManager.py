@@ -82,6 +82,12 @@ class SpookStationManager():
 				self.client.publish(device.deviceName + "/setStaticVolumeWhileTalking", device.getDesiredStaticVolumeWhileTalking(), qos=2)
 				if device.hasWordsToSay():
 					self.client.publish(device.deviceName + "/say", device.consumeWordsToSay(), qos=2)
+				desiredUseSoundString = None
+				if(device.getDesiredUseSound()):
+					desiredUseSoundString = "true"
+				else:
+					desiredUseSoundString = "false"
+				self.client.publish(device.deviceName + "/desired_use_sound", desiredUseSoundString, qos=2)
 			else:
 				print("Unknown device type for publishing control signals: " + str(device.deviceType))
 

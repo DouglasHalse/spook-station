@@ -1,10 +1,12 @@
-import sys, os
+import sys, os, threading
+from functools import partial
 sys.path.append(os.path.join(sys.path[0], '..', 'SpookStationMQTTManager'))
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.config import Config
+from kivy.clock import Clock
 Config.set('graphics', 'width', '800')
 Config.set('graphics', 'height', '480')
 
@@ -25,11 +27,24 @@ class EMFReaderWidget(BoxLayout):
     def OnLedNumChanged(self, numLed):
         numLed = int(numLed)
         deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredState(numLed)
-        self.SetLedState(numLed)
+
+    def SetCanvasLedCanvasOpacity(self, led, opacity, *largs):
+        self.ids['led' + str(led)].canvas.opacity = opacity
+        self.ids['led' + str(led)].canvas.ask_update()
 
     def SetLedState(self, ledState):
         for led in range(1, 5):
-            self.ids['led' + str(led)].canvas.opacity = 1 if  led <= ledState else  .5
+            opacity = 1 if  led <= ledState else  .5
+            Clock.schedule_once(partial(self.SetCanvasLedCanvasOpacity, led, opacity ), -1)
+
+    def setUseSoundActive(self, useSound, *largs):
+        if useSound == True:
+            self.ids["muteButton"].text = "Mute"
+        else:
+            self.ids["muteButton"].text = "Unmute"
+
+    def SetUseSound(self, useSound):
+        Clock.schedule_once(partial(self.setUseSoundActive, useSound), -1)
 
     def OnFluctuationMagnitudeChanged(self, magnitude):
         deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationMagnitude(magnitude)
@@ -39,11 +54,17 @@ class EMFReaderWidget(BoxLayout):
         deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationRate(rate)
         print("Rate set to " + str(rate))
 
+    def onMuteButtonChange(self):
+        currentlyUsingSound = deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].getCurrentUseSound()
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredUseSound(not currentlyUsingSound)
+        print("Setting use sound to " + str(not currentlyUsingSound))
+
 class GenericDeviceWidget(BoxLayout):
     def __init__(self, deviceType : SpookStationDeviceType, deviceName,  **kwargs):
         super().__init__(**kwargs)
         if deviceType == SpookStationDeviceType.EMFReader:
-            self.add_widget(EMFReaderWidget(deviceName=deviceName))
+            self.deviceWidget = EMFReaderWidget(deviceName=deviceName)
+            self.add_widget(self.deviceWidget)
 
 class BaseDeviceInfoLableWidget(BoxLayout):
     def __init__(self, deviceName : str, **kwargs):
@@ -73,8 +94,12 @@ class BaseDeviceInfoWidget(BoxLayout):
 class DeviceRowWidget(BoxLayout):
     def __init__(self, deviceType : SpookStationDeviceType, deviceName : str = "", **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(BaseDeviceInfoWidget(deviceName=deviceName))
-        self.add_widget(GenericDeviceWidget(deviceType=deviceType, deviceName=deviceName))
+        self.baseDeviceInfoWidget = BaseDeviceInfoWidget(deviceName=deviceName)
+        self.add_widget(self.baseDeviceInfoWidget)
+        self.genericDeviceWidget = GenericDeviceWidget(deviceType=deviceType, deviceName=deviceName)
+        self.add_widget(self.genericDeviceWidget)
+        deviceManager.devices[deviceManager.getDeviceIndex(deviceName)].setOnStateChangeCallback(self.genericDeviceWidget.deviceWidget.SetLedState)
+        deviceManager.devices[deviceManager.getDeviceIndex(deviceName)].setOnUseSoundChangeCallback(self.genericDeviceWidget.deviceWidget.SetUseSound)
 
     def Remove(self):
         self.parent.remove_widget(self)
@@ -82,8 +107,8 @@ class DeviceRowWidget(BoxLayout):
 class SpookStationWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(SpookStationWidget, self).__init__(**kwargs)
-        self.AddNewDeviceInfoWidget(deviceType=SpookStationDeviceType.EMFReader, deviceName= "EMFReader1")
         deviceManager.addDevice("EMFReader1", SpookStationDeviceType.EMFReader)
+        self.AddNewDeviceInfoWidget(deviceType=SpookStationDeviceType.EMFReader, deviceName= "EMFReader1")
 
     def AddNewDeviceInfoWidget(self, deviceType, deviceName):
         newDeviceRowWidget = DeviceRowWidget(deviceType=deviceType, deviceName=deviceName)

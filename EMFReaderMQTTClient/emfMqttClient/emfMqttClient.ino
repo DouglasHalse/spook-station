@@ -12,8 +12,11 @@ const int Buzzer = 6;
 
 const int ledArray[] = {LED1, LED2, LED3, LED4, LED5};
 
-const char* ssid = "spook-station-dev";
-const char* pass = "spook-station-dev";
+const char* ssid = "spook-station";
+const char* pass = "spook-station";
+
+//const char* ssid = "Telia-314B2D";
+//const char* pass = "3703C9CF7B";
 
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient);
@@ -137,9 +140,9 @@ void reconnect() {
   Serial.print("Connecting to WIFI: ");
   Serial.println(ssid);
   Serial.print("Connecting");
+  WiFi.begin(ssid, pass);
   while (WiFi.status() != WL_CONNECTED)
   {
-    WiFi.begin(ssid, pass);
     delayItterateScanLed(500);
     Serial.print(".");
   }
@@ -176,7 +179,12 @@ void setup() {
 
   
 
-  Serial.begin(9600);
+  /*Serial.begin(9600);
+  while((!Serial))
+  {
+  #  ;
+  #}
+  */
 
   reconnect();
 

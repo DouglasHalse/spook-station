@@ -115,7 +115,7 @@ bool receiveBool(int messageSize)
   }
   messageBuffer[messageSize] = '\0';
   String message = String(messageBuffer);
-  if(message == String("true"))
+  if(message == String("true") || message == String("True"))
   {
     return true;
   }

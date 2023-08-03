@@ -74,6 +74,14 @@ class SpookStationManager():
 			if device.deviceType == SpookStationDeviceType.EMFReader:
 				self.client.publish(device.deviceName + "/desired_state", device.getDesiredState(), qos=2)
 				self.client.publish(device.deviceName + "/desired_use_sound", device.getDesiredUseSound(), qos=2)
+			elif device.deviceType == SpookStationDeviceType.SpiritBox:
+				self.client.publish(device.deviceName + "/setVolume", device.getDesiredVolume(), qos=2)
+				self.client.publish(device.deviceName + "/setRate", device.getDesiredRate(), qos=2)
+				self.client.publish(device.deviceName + "/setVoice", device.getDesiredVoice(), qos=2)
+				self.client.publish(device.deviceName + "/setStaticVolume", device.getDesiredStaticVolume(), qos=2)
+				self.client.publish(device.deviceName + "/setStaticVolumeWhileTalking", device.getDesiredStaticVolumeWhileTalking(), qos=2)
+				if device.hasWordsToSay():
+					self.client.publish(device.deviceName + "/say", device.consumeWordsToSay(), qos=2)
 			else:
 				print("Unknown device type for publishing control signals: " + str(device.deviceType))
 

@@ -21,6 +21,12 @@ class SpookStationManager():
 		if self.useCyclicControlSignalPublishing:
 			self.cyclicControlSignalPublishing()
 
+	def __del__(self):
+		self.client.loop_stop()
+		self.client.disconnect()
+		del self.client
+		self.cyclicControlSignalPublishing = False
+
 
 	def cyclicControlSignalPublishing(self):
 		self.publishControlTopics()
@@ -35,7 +41,11 @@ class SpookStationManager():
 				if deviceTopic == "current_state":
 					device.setCurrentState(int(msg.payload))
 				elif deviceTopic == "current_use_sound":
-					device.setCurrentUseSound(bool(msg.payload))
+					currentUseSoundString = msg.payload.decode("utf-8")
+					if currentUseSoundString == "True" or currentUseSoundString == "true":
+						device.setCurrentUseSound(True)
+					else:
+						device.setCurrentUseSound(False)
 				device.updateLastMessage()
 				return
 			else:

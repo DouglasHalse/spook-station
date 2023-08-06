@@ -17,7 +17,10 @@ The communication used is MQTT over locally hosted access point so there are no 
 
 #### EMFReader
 Currently, we only support a modified EMFReader that has been modified to be controlled by an ESP32-S2 microcontroller instead of the actual electromagnetic frequency sensing equipment.
-The EMFReader automatically connects to the spook station and can be controlled through the GUI. 
+The EMFReader automatically connects to the spook station and can be controlled through the GUI.
+
+<img src="images/EMFReader.gif" width="30%" />
+
 ##### Features:
 The following can be controlled from the spook station:
 1.  How many lights should be lit up

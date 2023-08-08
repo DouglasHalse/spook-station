@@ -17,15 +17,21 @@
                     pos: self.pos
                     size: self.size
             BoxLayout:
+                size_hint: (.1, 1)        
+            BoxLayout:
                 id: led0
+                size_hint: (.2, 1)
                 canvas:
                     Color:
                         rgba: 0, 1, 0, 1
                     Ellipse:
                         pos: self.pos
                         size: self.size
+            BoxLayout:
+                size_hint: (.1, 1)         
             BoxLayout:
                 id: led1
+                size_hint: (.2, 1)
                 canvas:
                     Color:
                         rgba: 0, 1, 0, 1
@@ -33,7 +39,10 @@
                         pos: self.pos
                         size: self.size
             BoxLayout:
+                size_hint: (.1, 1)            
+            BoxLayout:
                 id: led2
+                size_hint: (.2, 1)
                 canvas:
                     Color:
                         rgba: 1, 1, 0, 1
@@ -41,7 +50,10 @@
                         pos: self.pos
                         size: self.size
             BoxLayout:
+                size_hint: (.1, 1)            
+            BoxLayout:
                 id: led3
+                size_hint: (.2, 1)
                 canvas:
                     Color:
                         rgba: 1, 0, 0, 1
@@ -49,17 +61,22 @@
                         pos: self.pos
                         size: self.size
             BoxLayout:
+                size_hint: (.1, 1)            
+            BoxLayout:
                 id: led4
+                size_hint: (.2, 1)
                 canvas:
                     Color:
                         rgba: 1, 0, 0, 1
                     Ellipse:
                         pos: self.pos
                         size: self.size
+            BoxLayout:
+                size_hint: (.1, 1)            
         Slider:
             id: ledSlider
             size_hint: 1, .5
-            padding: (self.width * .2) * 0.5
+            padding: (self.width * .2) * 0.5 + 13
             max: 4
             value: 0
             step: 1

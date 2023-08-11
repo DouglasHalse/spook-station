@@ -37,14 +37,14 @@ class EMFReaderWidget(BoxLayout):
             opacity = 1 if  led <= ledState else  .5
             Clock.schedule_once(partial(self.SetCanvasLedCanvasOpacity, led, opacity ), -1)
 
-    def setUseSoundActive(self, useSound, *largs):
+    def SetUseSoundActive(self, useSound, *largs):
         if useSound == True:
             self.ids["muteButton"].text = "Mute"
         else:
             self.ids["muteButton"].text = "Unmute"
 
     def SetUseSound(self, useSound):
-        Clock.schedule_once(partial(self.setUseSoundActive, useSound), -1)
+        Clock.schedule_once(partial(self.SetUseSoundActive, useSound), -1)
 
     def OnFluctuationMagnitudeChanged(self, magnitude):
         deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationMagnitude(magnitude)
@@ -54,7 +54,7 @@ class EMFReaderWidget(BoxLayout):
         deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationRate(rate)
         print("Rate set to " + str(rate))
 
-    def onMuteButtonChange(self):
+    def OnMuteButtonChange(self):
         currentlyUsingSound = deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].getCurrentUseSound()
         deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredUseSound(not currentlyUsingSound)
         print("Setting use sound to " + str(not currentlyUsingSound))

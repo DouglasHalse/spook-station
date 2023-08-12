@@ -1,14 +1,29 @@
 import sys, os, threading
 from functools import partial
+# Import the library
+import argparse
+# Create the parser
+parser = argparse.ArgumentParser()
+# Add an argument
+parser.add_argument('-f', '--fullscreen', action='store_true', help="Opens application in fullscreen mode")
+# Parse the argument
+args = parser.parse_args()
 sys.path.append(os.path.join(sys.path[0], '..', 'SpookStationMQTTManager'))
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.config import Config
 from kivy.clock import Clock
-Config.set('graphics', 'width', '800')
-Config.set('graphics', 'height', '480')
+
+if args.fullscreen:
+    #full screen mode
+    from kivy.core.window import Window
+    Window.fullscreen = True
+else:
+    # windowed mode
+    from kivy.config import Config
+    Config.set('graphics', 'width', '800')
+    Config.set('graphics', 'height', '480')
 
 from SpookStationManager import SpookStationManager
 from SpookStationManagerEnums import SpookStationDeviceType, SpookStationDeviceConnectionState

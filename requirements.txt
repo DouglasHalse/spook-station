@@ -1,0 +1,4 @@
+
+kivy[base]
+kivy_examples
+paho-mqtt

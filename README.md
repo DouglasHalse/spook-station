@@ -3,6 +3,33 @@ Spook station is a role-playing tool controlling ghost-hunting equipment wireles
 The idea is to have real-life ghost-hunting-like equipment used by the players that are remotely controlled by the game organizer (or Dungeon master).
 The Dungeon master can trigger behaviors in the devices in correspondence to events in the game.
 
+## Setup development environment
+
+### Windows
+(If you are trying to follow these steps for the first time, PLEASE let us know if you run into any problems so we can update the setup process)
+#### Prerequisites
+1. Python 3.9 (preferably installed from the Microsoft store)
+2. Mosquitto MQTT broker (https://mosquitto.org/download/)
+3. git (https://git-scm.com/download/win)
+
+####  Recommended dev-tools
+1. GitHub Desktop if you prefer GUI for git (https://desktop.github.com/)
+2. Visual Studio Code (https://code.visualstudio.com/)
+
+#### Installation
+1. Clone this repository to your Windows machine using git
+2. Run setupDevEnvironmentWindows.bat
+
+#### Start GUI with debugging (with Visual Studio Code)
+1. In Visual Studio Code: Select 'Open Folder...' and select the cloned repository
+2. Hit Ctrl + Shift + P and write 'select interpreter' and click 'Python: Select Interpreter'
+3. Select the Python executable found in \<cloned repository\>/venv/Scripts/python.exe
+4. Open the main GUI python file in Visual Studio Code: \<cloned repository\>/SpookStationGui/main.py
+5. Hit F5 to start debugging
+
+#### Start GUI without debugging
+1. Run runGuiWindows.bat
+
 ## The Hardware
 There are two types of hardware involved in this project: The Spook station and the devices.
 

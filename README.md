@@ -4,9 +4,8 @@ The idea is to have real-life ghost-hunting-like equipment used by the players t
 The Dungeon master can trigger behaviors in the devices in correspondence to events in the game.
 
 ## Setup development environment
-
-### Windows
 (If you are trying to follow these steps for the first time, PLEASE let us know if you run into any problems so we can update the setup process)
+### Windows
 #### Prerequisites
 1. Python 3.9 (preferably installed from the Microsoft store)
 2. Mosquitto MQTT broker (https://mosquitto.org/download/)
@@ -29,6 +28,30 @@ The Dungeon master can trigger behaviors in the devices in correspondence to eve
 
 #### Start GUI without debugging
 1. Run runGuiWindows.bat
+
+### Ubuntu
+#### Prerequisites
+1. Python 3.9 or Python 3.10
+
+####  Recommended dev-tools
+1. GitKraken Client if you prefer GUI for git (https://www.gitkraken.com/)
+2. Visual Studio Code (https://code.visualstudio.com/)
+
+#### Installation
+[//]: <> (<area>-tag to escape hyper-link creation)
+1. Clone this repository to your Ubuntu machine using git
+2. Run 'bash setupDevEnvironmentUbuntu.<area>sh'
+
+#### Start GUI with debugging (with Visual Studio Code)
+1. In Visual Studio Code: Select 'Open Folder...' and select the cloned repository
+2. Hit Ctrl + Shift + P and write 'select interpreter' and click 'Python: Select Interpreter'
+3. Select the Python executable found in \<cloned repository\>/venv/Scripts/python
+4. Open the main GUI python file in Visual Studio Code: \<cloned repository\>/SpookStationGui/main.py
+5. Hit F5 to start debugging
+
+#### Start GUI without debugging
+[//]: <> (<area>-tag to escape hyper-link creation)
+1. Run 'bash runGuiUbuntu.<area>sh'
 
 ## The Hardware
 There are two types of hardware involved in this project: The Spook station and the devices.

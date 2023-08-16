@@ -146,10 +146,10 @@
         text: 'deviceName' 
 
 <BaseDeviceConnectionIndicatorWidget>:
+    connectionIndicatorLedColor: (1.0, 0.0, 0.0, 1.0)
     canvas:
         Color:
-            id: color
-            rgba: 0,0,1,1
+            rgba: self.connectionIndicatorLedColor
         Ellipse:
             pos: self.pos
             size: self.size

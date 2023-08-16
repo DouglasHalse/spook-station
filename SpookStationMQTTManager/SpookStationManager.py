@@ -29,8 +29,9 @@ class SpookStationManager():
 		self.cyclicControlSignalPublishing = False
 		self.client.loop_stop()
 		self.client.disconnect()
+		for device in self.devices:
+			device.destroy()
 		del self.client
-		del self.devices
 	
 	def debugPrint(self, text: str):
 		if self.enableDebugPrints:

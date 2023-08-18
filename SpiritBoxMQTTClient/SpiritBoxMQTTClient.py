@@ -7,179 +7,189 @@ import sys
 import sched
 import time
 
+class _TTS:
+	engine = None
+	rate = None
+	def __init__(self, volume, rate, voice):
+		self.engine = pyttsx3.init()
+		self.engine.setProperty('volume', volume)
+		self.engine.setProperty('rate', rate)
+		self.engine.setProperty('voice', voice)
+
+	def start(self,text_):
+		self.engine.say(text_)
+		self.engine.runAndWait()
+
 class SpiritBoxMQTTClient():
-	def __init__(self, deviceName: str):
+	def __init__(self, deviceName: str, ipAddress: str = "192.168.7.1", enableDebugPrints: bool = False):
 		self.deviceName = deviceName
-		self.engine = pyttsx3.init('espeak')
+		self.enableDebugPrints = enableDebugPrints
+  
+		self.availableVoicesString = str()
+		self.engine = pyttsx3.init()
+		self.availableVoicesList = self.engine.getProperty('voices')
+		for voice in self.availableVoicesList:
+			if voice != self.availableVoicesList[-1]:
+				self.availableVoicesString += voice.name + ","
+			else:
+				self.availableVoicesString += voice.name
+		del(self.engine)
+		self.debugPrint("Available voices: " + self.availableVoicesString)
+
+		self.isTalking = False
+		self.lastWordsSaid = str()
+		self.volume = 1.0
+		self.rate = 300
+		self.voice = self.availableVoicesList[0].id
+		self.staticVolume = 0.1
+		self.staticVolumeWhileTalking = 0.1
 
 		self.outputStream = sd.OutputStream(callback=self.whiteNoiseCallback, channels=1)
 		self.outputStream.stop()
-		self.isTalking = False
-		self.staticVolume = 1.0
-		self.staticVolumeWhileTalking = 0.1
 
-		self.MQTTClient = mqtt.Client()
-		self.MQTTClient.connect("192.168.7.1", 1883, 60)
-		self.MQTTClient.on_connect = self.__on_connect
-		self.MQTTClient.on_message = self.__on_message
-  
 		self.SpiritBoxStateTopics = ["/getVolume", "/getRate", "/getVoice", "/availableVoices", "/getStaticVolume", "/getStaticVolumeWhileTalking"]
 		self.SpiritBoxControlTopics = ["/setVolume", "/setRate", "/setVoice", "/say", "/setStaticVolume", "/setStaticVolumeWhileTalking"]
-
+		self.MQTTClient = mqtt.Client()
+		self.MQTTClient.connect(ipAddress, 1883, 60)
+		self.MQTTClient.on_connect = self._on_connect
+		self.MQTTClient.on_message = self._on_message
 		self.MQTTClient.loop_start()
-  
-		self.availableVoices = str()
-		voices = self.engine.getProperty('voices')
-		for voice in voices:
-			if voice != voices[-1]:
-				self.availableVoices += voice.name + ","
-			else:
-				self.availableVoices += voice.name
 
-		print("Available voices:" + self.availableVoices)
+		self._sendVolume()
+		self._sendRate()
+		self._sendVoice()
+		self._sendStaticVolume()
+		self._sendStaticVolumeWhileTalking()
+		self._sendAvailableVoices()
 
-		self.__repeatSendingVolume()
-		self.__repeatSendingRate()
-		self.__repeatSendingAvailableVoices()
-		self.__repeatSendingVoice()
+	def debugPrint(self, text: str):
+		if self.enableDebugPrints:
+			print(self.deviceName + ":\t" + text)		
 
-		
-		self.engine.stop()
-		self.engine.setProperty('voice', 'swedish')
-		self.engine.runAndWait()
-
-		print("Using voice " + self.engine.getProperty('voice'))
-
-		
+	def voiceIdToName(self, voiceId: str) -> str:
+		for voice in self.availableVoicesList:
+			if voice.id == voiceId:
+				return voice.name
+		return ""
 		
 	def whiteNoiseCallback(self, outdata, frames, time, status): 
 		if status:
 			print(status, file=sys.stderr)
 		if self.isTalking:
-			outdata[:] = np.random.rand(frames, 1)*self.staticVolumeWhileTalking
+			outdata[:] = np.random.rand(frames, 1)*self.staticVolumeWhileTalking*0.1
 		else:
-			outdata[:] = np.random.rand(frames, 1)*self.staticVolume
-
-
+			outdata[:] = np.random.rand(frames, 1)*self.staticVolume*0.1
         
-	def __on_connect(self, client, userdata, flags, rc):
-		print("Connected with result code: " + str(rc) + "\n")
-		self.__subscribeToTopics()
+	def _on_connect(self, client, userdata, flags, rc):
+		self.debugPrint("Connected with result code: " + str(rc))
+		self._subscribeToTopics()
 		self.outputStream.start()
-		
-  
-	def __subscribeToTopics(self):
+
+	def _subscribeToTopics(self):
 		for topic in self.SpiritBoxControlTopics:
 			fullTopic = self.deviceName + topic
-			print("Subscribing to topic: " + fullTopic)
+			self.debugPrint("Subscribing to topic: " + fullTopic)
 			self.MQTTClient.subscribe(fullTopic)
    
-	def __on_message(self, client, userdata, msg):
-		print("Message received on topic: " + msg.topic)
+	def _on_message(self, client, userdata, msg):
 		if msg.topic == self.deviceName + "/setVolume":
 			volume = float(msg.payload)
-			self.__setVolume(volume)
+			self._setVolume(volume)
 		elif msg.topic == self.deviceName + "/setRate":
 			rate = int(msg.payload)
-			self.__setRate(rate)
+			self._setRate(rate)
 		elif msg.topic == self.deviceName + "/setVoice":
 			voice = msg.payload.decode('utf-8')
-			self.__setVoice(voice)
+			self._setVoice(voice)
 		elif msg.topic == self.deviceName + "/say":
-			self.__say(msg.payload)
+			self._say(msg.payload.decode('utf-8'))
 		elif msg.topic == self.deviceName + "/setStaticVolume":
 			volume = float(msg.payload)
-			self.__setStaticVolume(volume)
+			self._setStaticVolume(volume)
 		elif msg.topic == self.deviceName + "/setStaticVolumeWhileTalking":
 			volume = float(msg.payload)
-			self.__setStaticVolumeWhileTalking(volume)
+			self._setStaticVolumeWhileTalking(volume)
 		else:
 			print("Unknown topic: " + msg.topic)
   
-	def __repeatSendingVolume(self):
-		self.__sendVolume()
-		threading.Timer(1, self.__repeatSendingVolume).start()
-  
-	def __repeatSendingRate(self):
-		self.__sendRate()
-		threading.Timer(1, self.__repeatSendingRate).start()
-  
-	def __repeatSendingAvailableVoices(self):
-		self.__sendAvailableVoices()
-		threading.Timer(1, self.__repeatSendingAvailableVoices).start()
+	def _setVolume(self, volume):
+		if volume != self.volume:
+			self.debugPrint("Volume changed from " + str(self.volume) + " to " + str(volume))
+			self.volume = volume
+			self._sendVolume()
+			return
+		self._sendVolume()
+	
+	def _setRate(self, rate):
+		if rate != self.rate:
+			self.debugPrint("Rate changed from " + str(self.rate) + " to " + str(rate))
+			self.rate = rate
+			self._sendRate()
+			return
+		self._sendRate()
 
-	def __repeatSendingVoice(self):
-		self.__sendVoice()
-		threading.Timer(1, self.__repeatSendingVoice).start()
+	def _setVoice(self, voiceName):
+		if voiceName != self.voiceIdToName(self.voice): 
+			for voice in self.availableVoicesList:
+				if voice.name == voiceName:
+					self.debugPrint("Voice changed from " + self.voiceIdToName(self.voice) + " to " + voice.name)
+					self.voice = voice.id
+					self._sendVoice()
+					return
+			print("Unknown voice: " + voiceName)
+		self._sendVoice()
+    
+	def _setStaticVolume(self, volume):
+		if self.staticVolume != volume:
+			self.debugPrint("Static volume changed from " + str(self.staticVolume) + " to " + str(volume))
+			self.staticVolume = volume
+			self._sendStaticVolume()
+			return
+		self._sendStaticVolume()
 
-	def __repeatSendingStaticVolume(self):
-		self.__sendStaticVolume()
-		threading.Timer(1, self.__repeatSendingStaticVolume).start()
-
-	def __repeatSendingStaticVolumeWhileTalking(self):
-		self.__sendStaticVolumeWhileTalking()
-		threading.Timer(1, self.__repeatSendingStaticVolumeWhileTalking).start()
+	def _setStaticVolumeWhileTalking(self, volume):
+		if self.staticVolumeWhileTalking != volume:
+			self.debugPrint("Static volume while talking changed from " + str(self.staticVolumeWhileTalking) + " to " + str(volume))
+			self.staticVolumeWhileTalking = volume
+			self._sendStaticVolumeWhileTalking()
+			return
+		self._sendStaticVolumeWhileTalking()
   
-	def __setVolume(self, volume):
-		print("Setting volume to: " + str(volume) + "\n")
-		self.engine.stop()
-		self.engine.setProperty('volume', volume)
-		self.engine.runAndWait()
-		self.__sendVolume()
-  
-	def __sendVolume(self):
-		#print("Sending current volume: " + str(self.engine.getProperty('volume')))
-		volume = self.engine.getProperty('volume')
+	def _sendVolume(self):
+		volume = self.volume
+		self.debugPrint("Sending volume: " + str(volume))
 		self.MQTTClient.publish(self.deviceName + "/getVolume", volume)
 
-	def __sendStaticVolume(self):
+	def _sendStaticVolume(self):
+		self.debugPrint("Sending static volume: " + str(self.staticVolume))
 		self.MQTTClient.publish(self.deviceName + "/getStaticVolume", self.staticVolume)
 
-	def __sendStaticVolumeWhileTalking(self):
+	def _sendStaticVolumeWhileTalking(self):
+		self.debugPrint("Sending static volume while talking: " + str(self.staticVolumeWhileTalking))
 		self.MQTTClient.publish(self.deviceName + "/getStaticVolumeWhileTalking", self.staticVolumeWhileTalking)
   
-	def __sendRate(self):
-		#print("Sending current rate: " + str(self.engine.getProperty('rate')))
-		rate = self.engine.getProperty('rate')
-		self.MQTTClient.publish(self.deviceName + "/getRate", rate)
+	def _sendRate(self):
+		self.debugPrint("Sending rate: " + str(self.rate))
+		self.MQTTClient.publish(self.deviceName + "/getRate", str(self.rate))
+
+	def _sendVoice(self):
+		voiceId = self.voice
+		for voice in self.availableVoicesList:
+			if voice.id == voiceId:
+				self.debugPrint("Sending voice: " + voice.name)
+				self.MQTTClient.publish(self.deviceName + "/getVoice", voice.name)
+				return
+		print("voiceId not found in availableVoicesList")
   
-	def __setRate(self, rate):
-		print("Setting rate to: " + str(rate) + "\n")
-		self.engine.stop()
-		self.engine.setProperty('rate',  rate)
-		self.engine.runAndWait()
-		self.__sendRate()
+	def _sendAvailableVoices(self):
+		self.MQTTClient.publish(self.deviceName + "/availableVoices", self.availableVoicesString)
 
-	def __setVoice(self, voice):
-		if voice in self.availableVoices:
-			print("Setting voice to: " + voice)
-			self.engine.stop()
-			self.engine.setProperty('voice', voice)
-			self.engine.runAndWait()
-		else:
-			print("Unknown voice: " + voice)
-    
-	def __setStaticVolume(self, volume):
-		print("Setting static volume to : " + str(volume))
-		self.staticVolume = volume
-
-	def __setStaticVolumeWhileTalking(self, volume):
-		print("Setting static volume while talking to : " + str(volume))
-		self.staticVolumeWhileTalking = volume
-
-	def __sendVoice(self):
-		#print("Sending current voice: " + self.engine.getProperty('voice'))
-		voice = self.engine.getProperty('voice')
-		self.MQTTClient.publish(self.deviceName + "/getVoice", voice)
-  
-	def __sendAvailableVoices(self):
-		#print("Sending available voices: " + str(self.availableVoices))
-		self.MQTTClient.publish(self.deviceName + "/availableVoices", self.availableVoices)
-
-	def __say(self, text):
+	def _say(self, text):
 		self.isTalking = True
-		print("Saying: " + text.decode('utf-8'))
-		self.engine.say(text.decode('utf-8'))
-		self.engine.runAndWait()
+		self.debugPrint("Saying: " + text)
+		tts = _TTS(volume=self.volume, rate=self.rate, voice=self.voice)
+		tts.start(text)
+		del(tts)
 		self.isTalking = False
+		self.lastWordsSaid = text
 	

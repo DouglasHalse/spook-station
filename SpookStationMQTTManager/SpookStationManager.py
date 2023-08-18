@@ -1,13 +1,16 @@
 import paho.mqtt.client as mqtt
 from paho.mqtt.subscribeoptions import SubscribeOptions
-from SpookStationManagerEnums import SpookStationDeviceType
+from SpookStationManagerEnums import SpookStationDeviceType, SpookStationSignalType
 from SpookStationManagerDevices.SpookStationManagerDeviceEMFReader import SpookStationManagerDeviceEMFReader
+from SpookStationManagerDevices.SpookStationManagerDeviceSpiritbox import SpookStationManagerDeviceSpiritbox
+from SpookStationManagerDevices.SpookStationManagerDeviceUtil import SpookStationSignal
 import time
 import threading
 
 
 class SpookStationManager():
-	def __init__(self, useCyclicControlSignalPublishing: bool = True) -> None:
+	def __init__(self, useCyclicControlSignalPublishing: bool = True, enableDebugPrints = False) -> None:
+		self.enableDebugPrints = enableDebugPrints
 		self.devices = []
 		self.useCyclicControlSignalPublishing = useCyclicControlSignalPublishing
 
@@ -21,12 +24,23 @@ class SpookStationManager():
 		if self.useCyclicControlSignalPublishing:
 			self.cyclicControlSignalPublishing()
 
-	def __del__(self):
+	def destroy(self):
+		print("SpookStationManager destructor called")
+		self.cyclicControlSignalPublishing = False
 		self.client.loop_stop()
 		self.client.disconnect()
 		del self.client
-		self.cyclicControlSignalPublishing = False
+		del self.devices
+	
+	def debugPrint(self, text: str):
+		if self.enableDebugPrints:
+			print("SpookStation:\t" + text)	
 
+	def publishSpookStationSignal(self, signal: SpookStationSignal, signalType: SpookStationSignalType = SpookStationSignalType.Control):
+		if signal.hasChanged(signalType):
+			self.debugPrint("Publishing " + signal.name + " with value " + str(signal.getValue(signalType=signalType)) + " for " + signal.deviceName)
+			self.client.publish(signal.getTopic(signalType=signalType), str(signal.getValue(signalType=signalType)), qos=2)
+			signal.resetHasChanged(signalType=signalType)
 
 	def cyclicControlSignalPublishing(self):
 		self.publishControlTopics()
@@ -48,12 +62,35 @@ class SpookStationManager():
 						device.setCurrentUseSound(False)
 				device.updateLastMessage()
 				return
+			elif device.deviceName == deviceName and device.deviceType == SpookStationDeviceType.SpiritBox:
+				if deviceTopic == "getVolume":
+					self.debugPrint("Received volume: " + str(msg.payload.decode('utf-8')) + " from " + deviceName)
+					device.speechVolume.setValue(float(msg.payload), signalType=SpookStationSignalType.State)
+				elif deviceTopic == "getRate":
+					self.debugPrint("Received rate: " + str(msg.payload.decode('utf-8')) + " from " + deviceName)
+					device.speechRate.setValue(int(msg.payload), signalType=SpookStationSignalType.State)
+				elif deviceTopic == "getVoice":
+					self.debugPrint("Received voice: " + str(msg.payload.decode('utf-8')) + " from " + deviceName)
+					device.voice.setValue(msg.payload.decode('utf-8'), signalType=SpookStationSignalType.State)
+				elif deviceTopic == "availableVoices":
+					self.debugPrint("Received available voices: " + str(msg.payload.decode('utf-8')) + " from " + deviceName)
+					device.availableVoices.setValue(msg.payload.decode('utf-8'), signalType=SpookStationSignalType.State)
+				elif deviceTopic == "getStaticVolume":
+					self.debugPrint("Received static volume: " + str(msg.payload.decode('utf-8')) + " from " + deviceName)
+					device.staticVolume.setValue(float(msg.payload), signalType=SpookStationSignalType.State)
+				elif deviceTopic == "getStaticVolumeWhileTalking":
+					self.debugPrint("Received static volume while talking: " + str(msg.payload.decode('utf-8')) + " from " + deviceName)
+					device.staticVolumeWhileTalking.setValue(float(msg.payload), signalType=SpookStationSignalType.State)
+				else:
+					print("Unknown topic in message: " + msg.topic)
+				device.updateLastMessage()
+				return
 			else:
 				print("Message for unknown device: " + deviceName)
 
 	def __subscribeToTopics(self, device):
 		for topic in device.stateTopics:
-			print("Subscribing to: " + topic)
+			self.debugPrint("Subscribing to: " + topic)
 			self.client.loop_stop()
 			self.client.subscribe(topic, options=SubscribeOptions(qos=2))
 			self.client.loop_start()
@@ -73,21 +110,23 @@ class SpookStationManager():
 		for device in self.devices:
 			if device.deviceType == SpookStationDeviceType.EMFReader:
 				self.client.publish(device.deviceName + "/desired_state", device.getDesiredState(), qos=2)
-				self.client.publish(device.deviceName + "/desired_use_sound", device.getDesiredUseSound(), qos=2)
-			elif device.deviceType == SpookStationDeviceType.SpiritBox:
-				self.client.publish(device.deviceName + "/setVolume", device.getDesiredVolume(), qos=2)
-				self.client.publish(device.deviceName + "/setRate", device.getDesiredRate(), qos=2)
-				self.client.publish(device.deviceName + "/setVoice", device.getDesiredVoice(), qos=2)
-				self.client.publish(device.deviceName + "/setStaticVolume", device.getDesiredStaticVolume(), qos=2)
-				self.client.publish(device.deviceName + "/setStaticVolumeWhileTalking", device.getDesiredStaticVolumeWhileTalking(), qos=2)
-				if device.hasWordsToSay():
-					self.client.publish(device.deviceName + "/say", device.consumeWordsToSay(), qos=2)
 				desiredUseSoundString = None
 				if(device.getDesiredUseSound()):
 					desiredUseSoundString = "true"
 				else:
 					desiredUseSoundString = "false"
 				self.client.publish(device.deviceName + "/desired_use_sound", desiredUseSoundString, qos=2)
+			elif device.deviceType == SpookStationDeviceType.SpiritBox:
+				self.publishSpookStationSignal(device.speechVolume)
+				self.publishSpookStationSignal(device.speechRate)
+				self.publishSpookStationSignal(device.voice)
+				self.publishSpookStationSignal(device.staticVolume)
+				self.publishSpookStationSignal(device.staticVolumeWhileTalking)
+				if device.hasWordsToSay():
+					self.publishSpookStationSignal(device.wordsToSay)
+					# Reset since signal is only for one time use
+					device.wordsToSay.resetSignal()
+
 			else:
 				print("Unknown device type for publishing control signals: " + str(device.deviceType))
 
@@ -110,6 +149,8 @@ class SpookStationManager():
 				return False
 		if deviceType == SpookStationDeviceType.EMFReader:
 			device = SpookStationManagerDeviceEMFReader(deviceName)
+		elif deviceType == SpookStationDeviceType.SpiritBox:
+			device = SpookStationManagerDeviceSpiritbox(deviceName)
 		self.devices.append(device)
 		self.__subscribeToTopics(device)
 		return True

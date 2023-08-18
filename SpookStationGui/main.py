@@ -118,6 +118,10 @@ class SpookStationApp(App):
     def build(self):
         self.title = 'SpookStation'
         return SpookStationWidget()
+    def on_stop(self):
+        deviceManager.destroy()
+        return super().on_stop()
+
 
 
 if __name__ == '__main__':

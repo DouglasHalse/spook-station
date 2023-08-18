@@ -2,11 +2,12 @@ from SpookStationManagerEnums import SpookStationDeviceConnectionState, SpookSta
 import time
 
 class SpookStationDeviceBase():
-	def __init__(self, deviceName: str, deviceType: SpookStationDeviceType) -> None:
+	def __init__(self, deviceName: str, deviceType: SpookStationDeviceType, enableDebugPrints: bool = False) -> None:
 		self.stateTopics = []
 		self.deviceName = deviceName
 		self.deviceType = deviceType
 		self.lastMessage = 0
+		self.enableDebugPrints = enableDebugPrints
 		
 	def __str__(self) -> str:
 		return "Name: " + self.deviceName + " Type: " + str(self.deviceType) + " ConnectionState" + str(self.getConnectionState())

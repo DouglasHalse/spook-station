@@ -147,12 +147,12 @@
 
 <BaseDeviceConnectionIndicatorWidget>:
     connectionIndicatorLedColor: (1.0, 0.0, 0.0, 1.0)
-    canvas:
-        Color:
-            rgba: self.connectionIndicatorLedColor
-        Ellipse:
-            pos: self.pos
-            size: self.size
+
+    Image:
+        id: connectionIndicator
+        #size_hint: (1,1)
+        source: 'ghost_dead_red_circle.png'
+        #color: self.parent.connectionIndicatorLedColor
 
 <BaseDeviceInfoWidget>:
     id: info_box

@@ -82,11 +82,14 @@ class BaseDeviceConnectionIndicatorWidget(BoxLayout):
         
     def SetColor(self, state : SpookStationDeviceConnectionState, *largs):
         if state == SpookStationDeviceConnectionState.Disconnected:
-            self.connectionIndicatorLedColor = 1,0,0,1
+            #self.connectionIndicatorLedColor = 1,0,0,1
+            self.ids["connectionIndicator"].source = 'ghost_dead_red_circle.png'
         elif state == SpookStationDeviceConnectionState.PoorConnection:
-            self.connectionIndicatorLedColor = 1,1,0,1
+            #self.connectionIndicatorLedColor = 1,1,0,1
+            self.ids["connectionIndicator"].source = 'ghost_puke_yellow_circle.png'
         elif state == SpookStationDeviceConnectionState.Connected:
-            self.connectionIndicatorLedColor = 0,1,0,1
+            #self.connectionIndicatorLedColor = 0,1,0,1
+            self.ids["connectionIndicator"].source = 'ghost_happy_green_circle.png'
         else:
             print("Unsupported Device state: " + state)
     

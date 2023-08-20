@@ -26,7 +26,7 @@ class SpookStationManager():
 
 	def destroy(self):
 		print("SpookStationManager destructor called")
-		self.cyclicControlSignalPublishing = False
+		self.useCyclicControlSignalPublishing = False
 		self.client.loop_stop()
 		self.client.disconnect()
 		for device in self.devices:
@@ -46,7 +46,9 @@ class SpookStationManager():
 	def cyclicControlSignalPublishing(self):
 		self.publishControlTopics()
 		if self.useCyclicControlSignalPublishing:
-			threading.Timer(0.1, self.cyclicControlSignalPublishing).start()
+			thread = threading.Timer(0.1, self.cyclicControlSignalPublishing)
+			thread.setName("SpookStationManagerCyclicControlSignalPublishing")
+			thread.start()
 
 	def __on_message(self, client, userdata, msg):
 		deviceName, deviceTopic = msg.topic.split("/")

@@ -37,7 +37,9 @@ class SpookStationDeviceBase():
 			self.onConnectionStateChanged(currentConnectionState)
 			self.lastConnectionState = currentConnectionState
 		if self.repeatConnectionState:
-			threading.Timer(0.5, self.RepeatingConnectionStateCheck).start()
+			thread = threading.Timer(0.5, self.RepeatingConnectionStateCheck)
+			thread.setName("SpookStationDeviceBaseRepeatingConnectionStateCheck")
+			thread.start()
 
 	def setOnConnectionStateChangeCallback(self, callback):
 		self.onConnectionStateChanged = callback

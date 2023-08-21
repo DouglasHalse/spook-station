@@ -25,7 +25,7 @@ class SpookStationDeviceBase():
 	def getConnectionState(self):
 		if time.time() - self.lastMessage < 1:
 			return SpookStationDeviceConnectionState.Connected
-		elif time.time() - self.lastMessage < 5:
+		elif time.time() - self.lastMessage < 3:
 			return SpookStationDeviceConnectionState.PoorConnection
 		else:
 			return SpookStationDeviceConnectionState.Disconnected

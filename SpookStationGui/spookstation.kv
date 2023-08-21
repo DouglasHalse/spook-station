@@ -146,13 +146,12 @@
         text: 'deviceName' 
 
 <BaseDeviceConnectionIndicatorWidget>:
-    connectionIndicatorLedColor: (1.0, 0.0, 0.0, 1.0)
-    canvas:
-        Color:
-            rgba: self.connectionIndicatorLedColor
-        Ellipse:
-            pos: self.pos
-            size: self.size
+    Image:
+        id: deviceConnectionIndicator
+        source: 'Images/ghost_red.png'
+        size_hint: (1, 1)
+        allow_stretch: False
+        keep_ratio: True
 
 <BaseDeviceInfoWidget>:
     id: info_box
@@ -165,6 +164,7 @@
     size_hint_min: (1, 0.7)
     size_hint: (1, None)
     height: '96dp'
+    padding: 5
     canvas:
         Color:
             rgba: 0.2, 0.2, 0.2, 1

@@ -1,15 +1,24 @@
-from SpookStationManagerEnums import SpookStationDeviceType
+from SpookStationManagerEnums import SpookStationDeviceType, SpookStationSignalType
 from SpookStationManagerDevices.SpookStationManagerDeviceBase import SpookStationDeviceBase
+from SpookStationManagerDevices.SpookStationManagerDeviceUtil import SpookStationSignal
 import random, time, threading
 
 class SpookStationManagerDeviceEMFReader(SpookStationDeviceBase):
     def __init__(self, deviceName: str) -> None:
         super().__init__(deviceName, SpookStationDeviceType.EMFReader)
-        self.desiredState = 0
-        self.currentState = 0
+        self.state = SpookStationSignal(name="state", 
+                                        MQTTStateTopic=deviceName + "/current_state", 
+                                        MQTTControlTopic=deviceName + "/desired_state", 
+                                        deviceName=deviceName, 
+                                        initialValue=0, 
+                                        enableDebugPrints=self.enableDebugPrints)   
+        self.useSound = SpookStationSignal(name="useSound", 
+                                           MQTTStateTopic=deviceName + "/current_use_sound", 
+                                           MQTTControlTopic=deviceName + "/desired_use_sound", 
+                                           deviceName=deviceName, 
+                                           initialValue=False, 
+                                           enableDebugPrints=self.enableDebugPrints)
         self.currentStateChangeCallback = None
-        self.desiredUseSound = False
-        self.currentUseSound = False
         self.currentUseSoundChangeCallback = None
         self.fluctuationRate = 0
         self.fluctuationMagnitude = 0
@@ -26,53 +35,27 @@ class SpookStationManagerDeviceEMFReader(SpookStationDeviceBase):
         self.currentUseSoundChangeCallback = callbackFunction
 
     def setCurrentState(self, state: int):
-        if self.currentStateChangeCallback != None and self.currentState != state:
+        if self.currentStateChangeCallback != None and self.state.getValue(signalType=SpookStationSignalType.State) != state:
             self.currentStateChangeCallback(state)
-        self.currentState = state
+        self.state.setValue(state, signalType=SpookStationSignalType.State)
 
-    def getCurrentState(self) -> int:
-        return self.currentState
-    
-    def setDesiredState(self, state: int):
-        self.desiredState = state
-
-    def getDesiredState(self) -> int:
+    def getDesiredStateWithFluctuation(self) -> int:
         self.lastGetStateTime = time.time()
         if self._shouldAlterFluctuation():
-            alteredState = self.desiredState + random.randint(-self.fluctuationMagnitude, self.fluctuationMagnitude)
+            desiredStateWithoutFluctuation = self.state.getValue(signalType=SpookStationSignalType.Control)
+            alteredState = desiredStateWithoutFluctuation + random.randint(-self.fluctuationMagnitude, self.fluctuationMagnitude)
             if alteredState < 0:
                 alteredState = 0
             elif alteredState > 4:
                 alteredState = 4
             return alteredState
-        return self.desiredState
-    
-    def setCurrentUseSound(self, useSound: bool):
-        if self.currentUseSoundChangeCallback != None and self.currentUseSound != useSound:
-            self.currentUseSoundChangeCallback(useSound)
-        self.currentUseSound = useSound
-
-    def getCurrentUseSound(self) -> bool:
-        return self.currentUseSound
-    
+        return self.state.getValue(signalType=SpookStationSignalType.Control)
+        
     def setDesiredUseSound(self, useSound: bool):
-        self.desiredUseSound = useSound
+        if self.currentUseSoundChangeCallback != None and self.useSound.getValue(signalType=SpookStationSignalType.Control) != useSound:
+            self.currentUseSoundChangeCallback(useSound)
+        self.useSound.setValue(useSound, signalType=SpookStationSignalType.Control)
 
-    def getDesiredUseSound(self) -> bool:
-        return self.desiredUseSound
-    
-    def setFluctuationRate(self, fluctuationRate: int):
-        self.fluctuationRate = fluctuationRate
-
-    def getFluctuationRate(self) -> int:
-        return self.fluctuationRate
-    
-    def setFluctuationMagnitude(self, fluctuationMagnitude: int):
-        self.fluctuationMagnitude = fluctuationMagnitude
-
-    def getFluctuationMagnitude(self) -> int:
-        return self.fluctuationMagnitude
-    
     def _shouldAlterFluctuation(self) -> bool:
         timeSinceLastAlter = time.time() - self.lastAlteredStateTime
         if self.fluctuationRate == 0:

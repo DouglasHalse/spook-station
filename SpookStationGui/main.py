@@ -11,7 +11,7 @@ Config.set('graphics', 'width', '800')
 Config.set('graphics', 'height', '480')
 
 from SpookStationManager import SpookStationManager
-from SpookStationManagerEnums import SpookStationDeviceType, SpookStationDeviceConnectionState
+from SpookStationManagerEnums import SpookStationDeviceType, SpookStationDeviceConnectionState, SpookStationSignalType
 
 from enum import Enum
 
@@ -28,7 +28,7 @@ class EMFReaderWidget(BoxLayout):
 
     def OnLedNumChanged(self, numLed):
         numLed = int(numLed)
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredState(numLed)
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].state.setValue(numLed, signalType=SpookStationSignalType.Control)
 
     def SetCanvasLedCanvasOpacity(self, led, opacity, *largs):
         self.ids['led' + str(led)].canvas.opacity = opacity
@@ -49,16 +49,16 @@ class EMFReaderWidget(BoxLayout):
         Clock.schedule_once(partial(self.SetUseSoundActive, useSound), -1)
 
     def OnFluctuationMagnitudeChanged(self, magnitude):
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationMagnitude(magnitude)
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].fluctuationMagnitude = magnitude
         print("Magnitude set to " + str(magnitude))
 
     def OnFluctuationRateChanged(self, rate):
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setFluctuationRate(rate)
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].fluctuationRate = rate
         print("Rate set to " + str(rate))
 
     def OnMuteButtonChange(self):
-        currentlyUsingSound = deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].getCurrentUseSound()
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredUseSound(not currentlyUsingSound)
+        currentlyUsingSound = deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].useSound.getValue(signalType=SpookStationSignalType.State)
+        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredUseSound(useSound = not currentlyUsingSound)
         print("Setting use sound to " + str(not currentlyUsingSound))
 
 class GenericDeviceWidget(BoxLayout):

@@ -37,12 +37,6 @@ class SpookStationManager():
 		if self.enableDebugPrints:
 			print("SpookStation:\t" + text)	
 
-	def publishSpookStationSignal(self, signal: SpookStationSignal, signalType: SpookStationSignalType = SpookStationSignalType.Control):
-		if signal.hasChanged(signalType):
-			self.debugPrint("Publishing " + signal.name + " with value " + str(signal.getValue(signalType=signalType)) + " for " + signal.deviceName)
-			self.client.publish(signal.getTopic(signalType=signalType), str(signal.getValue(signalType=signalType)), qos=2)
-			signal.resetHasChanged(signalType=signalType)
-
 	def cyclicControlSignalPublishing(self):
 		self.publishControlTopics()
 		if self.useCyclicControlSignalPublishing:
@@ -56,13 +50,13 @@ class SpookStationManager():
 		for device in self.devices:
 			if device.deviceName == deviceName and device.deviceType == SpookStationDeviceType.EMFReader:
 				if deviceTopic == "current_state":
-					device.setCurrentState(int(msg.payload))
+					device.setCurrentState(int(msg.payload.decode("utf-8")))
 				elif deviceTopic == "current_use_sound":
 					currentUseSoundString = msg.payload.decode("utf-8")
 					if currentUseSoundString == "True" or currentUseSoundString == "true":
-						device.setCurrentUseSound(True)
+						device.useSound.setValue(True, signalType=SpookStationSignalType.State)
 					else:
-						device.setCurrentUseSound(False)
+						device.useSound.setValue(False, signalType=SpookStationSignalType.State)
 				device.updateLastMessage()
 				return
 			elif device.deviceName == deviceName and device.deviceType == SpookStationDeviceType.SpiritBox:
@@ -112,23 +106,55 @@ class SpookStationManager():
 	def publishControlTopics(self):
 		for device in self.devices:
 			if device.deviceType == SpookStationDeviceType.EMFReader:
-				self.client.publish(device.deviceName + "/desired_state", device.getDesiredState(), qos=2)
-				desiredUseSoundString = None
-				if(device.getDesiredUseSound()):
-					desiredUseSoundString = "true"
-				else:
-					desiredUseSoundString = "false"
-				self.client.publish(device.deviceName + "/desired_use_sound", desiredUseSoundString, qos=2)
+				# Publish EMFReader state
+				stateWithFluctuation = device.getDesiredStateWithFluctuation()
+				self.client.publish(device.state.controlTopic, stateWithFluctuation, qos=2)
+				self.debugPrint("Publishing desired state: " + str(stateWithFluctuation) + " for " + device.deviceName)
+				
+				# Publish EMFReader useSound
+				if device.useSound.hasChanged(signalType=SpookStationSignalType.Control):
+					desiredUseSoundString = "true" if device.useSound.getValue(signalType=SpookStationSignalType.Control) else "false"
+					self.client.publish(device.useSound.controlTopic, desiredUseSoundString, qos=2)
+					device.useSound.resetHasChanged(signalType=SpookStationSignalType.Control)
+					self.debugPrint("Publishing desired use sound: " + desiredUseSoundString + " for " + device.deviceName)
+
 			elif device.deviceType == SpookStationDeviceType.SpiritBox:
-				self.publishSpookStationSignal(device.speechVolume)
-				self.publishSpookStationSignal(device.speechRate)
-				self.publishSpookStationSignal(device.voice)
-				self.publishSpookStationSignal(device.staticVolume)
-				self.publishSpookStationSignal(device.staticVolumeWhileTalking)
+				# Publish SpiritBox speechVolume
+				if device.speechVolume.hasChanged(signalType=SpookStationSignalType.Control):
+					self.client.publish(device.speechVolume.controlTopic, device.speechVolume.getValue(SpookStationSignalType.Control), qos=2)
+					device.speechVolume.resetHasChanged(signalType=SpookStationSignalType.Control)
+					self.debugPrint("Publishing desired speech volume: " + str(device.speechVolume.getValue(SpookStationSignalType.Control)) + " for " + device.deviceName)
+
+				# Publish SpiritBox speechRate
+				if device.speechRate.hasChanged(signalType=SpookStationSignalType.Control):
+					self.client.publish(device.speechRate.controlTopic, device.speechRate.getValue(SpookStationSignalType.Control), qos=2)
+					device.speechRate.resetHasChanged(signalType=SpookStationSignalType.Control)
+					self.debugPrint("Publishing desired speech rate: " + str(device.speechRate.getValue(SpookStationSignalType.Control)) + " for " + device.deviceName)
+
+				# Publish SpiritBox voice
+				if device.voice.hasChanged(signalType=SpookStationSignalType.Control):
+					self.client.publish(device.voice.controlTopic, device.voice.getValue(SpookStationSignalType.Control), qos=2)
+					device.voice.resetHasChanged(signalType=SpookStationSignalType.Control)
+					self.debugPrint("Publishing desired voice: " + str(device.voice.getValue(SpookStationSignalType.Control)) + " for " + device.deviceName)
+
+				# Publish SpiritBox staticVolume
+				if device.staticVolume.hasChanged(signalType=SpookStationSignalType.Control):
+					self.client.publish(device.staticVolume.controlTopic, device.staticVolume.getValue(SpookStationSignalType.Control), qos=2)
+					device.staticVolume.resetHasChanged(signalType=SpookStationSignalType.Control)
+					self.debugPrint("Publishing desired static volume: " + str(device.staticVolume.getValue(SpookStationSignalType.Control)) + " for " + device.deviceName)
+
+				# Publish SpiritBox staticVolumeWhileTalking
+				if device.staticVolumeWhileTalking.hasChanged(signalType=SpookStationSignalType.Control):
+					self.client.publish(device.staticVolumeWhileTalking.controlTopic, device.staticVolumeWhileTalking.getValue(SpookStationSignalType.Control), qos=2)
+					device.staticVolumeWhileTalking.resetHasChanged(signalType=SpookStationSignalType.Control)
+					self.debugPrint("Publishing desired static volume while talking: " + str(device.staticVolumeWhileTalking.getValue(SpookStationSignalType.Control)) + " for " + device.deviceName)
+
+				# Publish SpiritBox wordsToSay
 				if device.hasWordsToSay():
-					self.publishSpookStationSignal(device.wordsToSay)
-					# Reset since signal is only for one time use
+					self.client.publish(device.wordsToSay.controlTopic, device.wordsToSay.getValue(SpookStationSignalType.Control), qos=2)
+					device.wordsToSay.resetHasChanged(signalType=SpookStationSignalType.Control)
 					device.wordsToSay.resetSignal()
+					self.debugPrint("Publishing desired words to say: " + str(device.wordsToSay.getValue(SpookStationSignalType.Control)) + " for " + device.deviceName)
 
 			else:
 				print("Unknown device type for publishing control signals: " + str(device.deviceType))

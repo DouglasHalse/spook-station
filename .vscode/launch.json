@@ -8,7 +8,7 @@
             "name": "Python: Run SpookStation GUI",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/SpookStationGui/main.py",
+            "program": "${workspaceFolder}/SpookStation/SpookStationGui/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },

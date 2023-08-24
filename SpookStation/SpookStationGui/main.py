@@ -1,6 +1,6 @@
 import sys, os, threading
 from functools import partial
-sys.path.append(os.path.join(sys.path[0], '..', 'SpookStationMQTTManager'))
+sys.path.append(os.path.join(sys.path[0], '..', 'SpookStationManager'))
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout

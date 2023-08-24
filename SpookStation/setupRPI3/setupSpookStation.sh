@@ -11,16 +11,16 @@ sudo apt -y install python3-setuptools git-core python3-dev libsdl2-dev libsdl2-
    xclip xsel libjpeg-dev 
 
 # Remove old venv
-sudo rm -r ../venv
+sudo rm -r ../../venv
 
 # Install virtualenv
 python3 -m pip install --upgrade pip setuptools virtualenv
 
 # Create venv
-python3 -m venv ../venv
+python3 -m venv ../../venv
 
 # Activate venv
-source ../venv/bin/activate
+source ../../venv/bin/activate
 
 # Verify venv was activated
 if [[ "$VIRTUAL_ENV" == "" ]]
@@ -30,7 +30,7 @@ then
 fi
 
 # Install kivy in venv
-../venv/bin/python -m pip install kivy[base] kivy_examples paho-mqtt
+../../venv/bin/python -m pip install kivy[base] kivy_examples paho-mqtt
 
 # Install dependencies for Access Point
 sudo apt install hostapd dnsmasq mosquitto mosquitto-clients

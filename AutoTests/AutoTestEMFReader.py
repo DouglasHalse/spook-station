@@ -1,6 +1,6 @@
 import sys, os, time
 import paho.mqtt.client as mqtt
-sys.path.append(os.path.join(sys.path[0], '..', 'SpookStationMQTTManager'))
+sys.path.append(os.path.join(sys.path[0], '..', 'SpookStation', 'SpookStationManager'))
 
 from SpookStationManager import SpookStationManager
 from SpookStationManagerEnums import SpookStationDeviceType, SpookStationDeviceConnectionState

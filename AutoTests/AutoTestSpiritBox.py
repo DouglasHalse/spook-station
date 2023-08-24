@@ -2,8 +2,8 @@ import sys, os, time
 import paho.mqtt.client as mqtt
 import traceback
 import numpy as np
-sys.path.append(os.path.join(sys.path[0], '..', 'SpookStationMQTTManager'))
-sys.path.append(os.path.join(sys.path[0], '..', 'SpiritBoxMQTTClient'))
+sys.path.append(os.path.join(sys.path[0], '..', 'SpookStation', 'SpookStationManager'))
+sys.path.append(os.path.join(sys.path[0], '..', 'Devices', 'SpiritBox', 'SpiritBoxMQTTClient'))
 
 from SpookStationManager import SpookStationManager
 from SpookStationManagerEnums import SpookStationDeviceType, SpookStationDeviceConnectionState, SpookStationSignalType

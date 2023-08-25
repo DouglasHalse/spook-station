@@ -23,7 +23,7 @@ The Dungeon master can trigger behaviors in the devices in correspondence to eve
 1. In Visual Studio Code: Select 'Open Folder...' and select the cloned repository
 2. Hit Ctrl + Shift + P and write 'select interpreter' and click 'Python: Select Interpreter'
 3. Select the Python executable found in \<cloned repository\>/venv/Scripts/python.exe
-4. Open the main GUI python file in Visual Studio Code: \<cloned repository\>/SpookStationGui/main.py
+4. Open the main GUI python file in Visual Studio Code: \<cloned repository\>/SpookStation/SpookStationGui/main.py
 5. Hit F5 to start debugging
 
 #### Start GUI without debugging
@@ -46,7 +46,7 @@ The Dungeon master can trigger behaviors in the devices in correspondence to eve
 1. In Visual Studio Code: Select 'Open Folder...' and select the cloned repository
 2. Hit Ctrl + Shift + P and write 'select interpreter' and click 'Python: Select Interpreter'
 3. Select the Python executable found in \<cloned repository\>/venv/Scripts/python
-4. Open the main GUI python file in Visual Studio Code: \<cloned repository\>/SpookStationGui/main.py
+4. Open the main GUI python file in Visual Studio Code: \<cloned repository\>/SpookStation/SpookStationGui/main.py
 5. Hit F5 to start debugging
 
 #### Start GUI without debugging

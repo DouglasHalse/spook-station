@@ -23,12 +23,12 @@ class EMFReaderWidget(BoxLayout):
         self.deviceName = deviceName
         for led in range(1, 5):
             self.ids['led' + str(led)].canvas.opacity = .5
-        deviceManager.devices[deviceManager.getDeviceIndex(deviceName)].setOnStateChangeCallback(self.SetLedState)
-        deviceManager.devices[deviceManager.getDeviceIndex(deviceName)].setOnUseSoundChangeCallback(self.SetUseSound)
+        deviceManager.devices[deviceName].setOnStateChangeCallback(self.SetLedState)
+        deviceManager.devices[deviceName].setOnUseSoundChangeCallback(self.SetUseSound)
 
     def OnLedNumChanged(self, numLed):
         numLed = int(numLed)
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].state.setValue(numLed, signalType=SpookStationSignalType.Control)
+        deviceManager.devices[self.deviceName].state.setValue(numLed, signalType=SpookStationSignalType.Control)
 
     def SetCanvasLedCanvasOpacity(self, led, opacity, *largs):
         self.ids['led' + str(led)].canvas.opacity = opacity
@@ -49,16 +49,16 @@ class EMFReaderWidget(BoxLayout):
         Clock.schedule_once(partial(self.SetUseSoundActive, useSound), -1)
 
     def OnFluctuationMagnitudeChanged(self, magnitude):
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].fluctuationMagnitude = magnitude
+        deviceManager.devices[self.deviceName].fluctuationMagnitude = magnitude
         print("Magnitude set to " + str(magnitude))
 
     def OnFluctuationRateChanged(self, rate):
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].fluctuationRate = rate
+        deviceManager.devices[self.deviceName].fluctuationRate = rate
         print("Rate set to " + str(rate))
 
     def OnMuteButtonChange(self):
-        currentlyUsingSound = deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].useSound.getValue(signalType=SpookStationSignalType.State)
-        deviceManager.devices[deviceManager.getDeviceIndex(self.deviceName)].setDesiredUseSound(useSound = not currentlyUsingSound)
+        currentlyUsingSound = deviceManager.devices[self.deviceName].useSound.getValue(signalType=SpookStationSignalType.State)
+        deviceManager.devices[self.deviceName].setDesiredUseSound(useSound = not currentlyUsingSound)
         print("Setting use sound to " + str(not currentlyUsingSound))
 
 class GenericDeviceWidget(BoxLayout):
@@ -78,7 +78,7 @@ class BaseDeviceInfoLableWidget(BoxLayout):
 class BaseDeviceConnectionIndicatorWidget(BoxLayout):
     def __init__(self, deviceName : str, **kwargs):
         super().__init__(**kwargs)
-        deviceManager.devices[deviceManager.getDeviceIndex(deviceName)].setOnConnectionStateChangeCallback(self.ConnectionStateChangeCallback)
+        deviceManager.devices[deviceName].setOnConnectionStateChangeCallback(self.ConnectionStateChangeCallback)
         
     def SetColor(self, state : SpookStationDeviceConnectionState, *largs):
         if state == SpookStationDeviceConnectionState.Disconnected:

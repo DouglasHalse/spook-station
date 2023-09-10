@@ -5,3 +5,5 @@ paho-mqtt
 pyttsx3
 numpy
 sounddevice
+pytest
+pytest-mqtt

@@ -14,7 +14,7 @@ inputState = input("Enter desired state: ")
 manager.devices["EMFReader1"].setDesiredState(int(inputState))
 
 inputFluctuationRate = input("Enter desired fluctuation rate: ")
-manager.devices["EMFReader1").fluctuationRate = (int(inputFluctuationRate))
+manager.devices["EMFReader1"].fluctuationRate = (int(inputFluctuationRate))
 
 inputFluctuationMagnitude = input("Enter desired fluctuation magnitude: ")
 manager.devices["EMFReader1"].fluctuationMagnitude = (int(inputFluctuationMagnitude))

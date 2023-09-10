@@ -43,7 +43,7 @@ class SpiritBoxMQTTClient():
 		self.voice = self.availableVoicesList[0].id
 		self.staticVolume = 0.1
 		self.staticVolumeWhileTalking = 0.1
-
+		self.debugPrint("Available audio devices: " + str(sd.query_devices()))
 		self.outputStream = sd.OutputStream(callback=self.whiteNoiseCallback, channels=1)
 		self.outputStream.stop()
 

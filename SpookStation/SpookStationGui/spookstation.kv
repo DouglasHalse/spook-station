@@ -172,36 +172,388 @@
             pos: self.pos
             size: self.size
 
+<ManageDevicesPopup>:
+    id: manageDevicesPopup
+    title: 'Manage devices'
+    size_hint: (0.5, 0.77)
+    
+
+    GridLayout:
+        id: manageDevicesAddedDevicesGrid
+        cols: 1
+        size_hint: (1, 1)
+        spacing: [10, 10]
+        
+        GridLayout:
+            id: manageDevicesAddedDevicesGridHeader
+            cols: 2
+            size_hint: (1, None)
+            padding: [10, 0, 10, 0]
+            height: '50dp'
+            canvas:
+                Color:
+                    rgba: 0.4, 0.4, 0.4, 1.0
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            
+            Label:
+                id: manageDevicesAddedDevicesGridHeaderDeviceName
+                text: 'Device Name'
+                halign: 'left'
+                valign: 'middle'
+                size_hint: None, None
+                text_size: self.size
+                width: '130dp'
+                height: '50dp'
+
+            Label:
+                id: manageDevicesAddedDevicesGridHeaderDeviceType
+                text: 'Device Type'
+                halign: 'left'
+                valign: 'middle'
+                size_hint: None, None
+                text_size: self.size
+                width: '130dp'
+                height: '50dp'
+
+        ScrollView:
+            id: manageDevicesAddedDevicesGridList
+            size_hint: (1, None)
+            height: '200dp'
+            do_scroll_x: False
+            do_scroll_y: True
+
+            GridLayout:
+                id: manageDevicesAddedDevicesGridListContent
+                cols: 1
+                size_hint_y: None
+                size_hint_x: 1
+                height: self.minimum_height
+                row_default_height: '50dp'
+                
+        BoxLayoutButton:
+            id: manageDevicesAddDeviceBox
+            size_hint: (None, None)
+            height: '30dp'
+            width: '130dp'
+            on_press: root.OnAddDeviceButtonPressed()
+            canvas:
+                Color:
+                    rgba: 0.4, 0.4, 0.4, 1.0
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            
+            Label:
+                id: manageDevicesAddDeviceLabel
+                text: 'Add new device'
+                size_hint: (1, 1)
+
+
+<ManageDevicesPopupDevice>:
+    orientation: 'horizontal'
+    size_hint: (1, None)
+    height: '50dp'
+    padding: [10, 0, 10, 0]
+    canvas:
+        Color:
+            rgba: 0.2, 0.2, 0.2, 0.5
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Label:
+        id: manageDeviceAddedDeviceName
+        text: 'deviceName'
+        halign: 'left'
+        valign: 'middle'
+        size_hint: None, None
+        text_size: self.size
+        width: '130dp'
+        height: '50dp'
+    
+    Label:
+        id: manageDeviceAddedDeviceType
+        text: 'deviceType'
+        halign: 'left'
+        valign: 'middle'
+        size_hint: None, None
+        text_size: self.size
+        width: '130dp'
+        height: '50dp'
+    
+    Button:
+        id: manageDeviceAddedDeviceRemoveButton
+        text: 'Manage'
+        halign: 'center'
+        valign: 'middle'
+        size_hint: None, None
+        text_size: self.size
+        width: '100dp'
+        height: '50dp'
+        on_press: root.OnManageDeviceButtonPressed(root.ids.manageDeviceAddedDeviceName.text)
+
+<ManageDevicePopup>:
+    id: manageDevicePopup
+    title: 'Manage device'
+    height: '320dp'
+    width: '300dp'
+    size_hint: None, None
+    GridLayout:
+        cols: 1
+        padding: [10, 10, 10, 10]
+        spacing: [5, 5]
+
+        BoxLayout:
+            id: manageDeviceNameLabel
+            size_hint: 1, None
+            height: '20dp'
+            Label:
+                id: addDeviceNameLabel
+                halign: 'left'
+                text_size: self.size
+                text: 'Device Name:'
+                
+        TextInput:
+            id: manageDeviceNameInput
+            size_hint: 1, None
+            height: '40dp'
+            font_size: '20dp'
+            multiline: False
+            focus: True
+            on_text_validate: root.OnConfirmButtonPressed()
+        
+        BoxLayout:
+            id: manageDeviceTypeLabel
+            size_hint: 1, None
+            height: '20dp'
+            Label:
+                halign: 'left'
+                text_size: self.size
+                id: manageDeviceTypeLabel
+                text: 'Device Type:'
+                size_hint: (1, 1)
+        
+        Spinner:
+            id: manageDeviceTypeSpinner
+            size_hint: 1, None
+            height: '40dp'
+            text: 'UNDEFINED'
+            values: ['UNDEFINED']
+        
+        BoxLayout:
+            id: manageDeviceButtonsSpacer
+            size_hint: 1, None
+            height: '40dp'
+        
+        GridLayout:
+            id: manageDeviceButtonsGrid
+            cols: 4
+            size_hint: 1, None
+            height: '50dp'
+            spacing: [10, 10]
+
+            BoxLayoutButton:
+                id: manageDeviceRemoveButton
+                size_hint: 1, None
+                height: '50dp'
+                width: '70dp'
+                on_press: root.OnRemoveButtonPressed()
+                canvas:
+                    Color:
+                        rgba: 1.0, 0.0, 0.0, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                
+                Label:
+                    id: manageDeviceRemoveLabel
+                    text: 'Remove'
+                    size_hint: (1, 1)
+            
+            BoxLayout:
+                id: manageDeviceRemoveButtonSpacer
+                size_hint: None, None
+                height: '50dp'
+                width: '30dp'
+
+            BoxLayoutButton:
+                id: manageDeviceCancelButton
+                size_hint: 1, None
+                height: '50dp'
+                width: '70dp'
+                on_press: root.dismiss()
+                canvas:
+                    Color:
+                        rgba: 0.7, 0.7, 0.7, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                
+                Label:
+                    id: manageDeviceCancelLabel
+                    text: 'Cancel'
+                    size_hint: (1, 1)
+
+            BoxLayoutButton:
+                id: manageDeviceConfirmButton
+                size_hint: 1, None
+                height: '50dp'
+                width: '70dp'
+                on_press: root.OnConfirmButtonPressed()
+                canvas:
+                    Color:
+                        rgba: 0.7, 0.7, 0.7, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                
+                Label:
+                    id: manageDeviceRemoveLabel
+                    text: 'Confirm'
+                    size_hint: (1, 1)
+
+<AddDevicePopup>:
+    id: addDevicePopup
+    title: 'Add a device'
+    height: '320dp'
+    width: '300dp'
+    size_hint: None, None
+    GridLayout:
+        cols: 1
+        padding: [10, 10, 10, 10]
+        spacing: [10, 10]
+
+        BoxLayout:
+            id: addDeviceNameLabel
+            size_hint: 1, None
+            height: '20dp'
+            Label:
+                id: addDeviceNameLabel
+                halign: 'left'
+                text_size: self.size
+                text: 'Device Name:'
+                
+        TextInput:
+            id: addDeviceNameInput
+            size_hint: 1, None
+            height: '40dp'
+            font_size: '20dp'
+            multiline: False
+            focus: True
+            on_text_validate: root.AddDevice()
+        
+        BoxLayout:
+            id: addDeviceTypeLabel
+            size_hint: 1, None
+            height: '20dp'
+            Label:
+                halign: 'left'
+                text_size: self.size
+                id: addDeviceTypeLabel
+                text: 'Device Type:'
+                size_hint: (1, 1)
+        
+        Spinner:
+            id: addDeviceTypeSpinner
+            size_hint: 1, None
+            height: '40dp'
+            text: 'UNDEFINED'
+            values: ['UNDEFINED']
+        
+        BoxLayout:
+            id: addDeviceAddButtonSpacer
+            size_hint: 1, None
+            height: '20dp'
+        
+        BoxLayoutButton:
+            id: addDeviceAddButton
+            size_hint: 1, None
+            height: '50dp'
+            on_press: root.AddDevice()
+            canvas:
+                Color:
+                    rgba: 0.7, 0.7, 0.7, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Label:
+                id: addDeviceAddLabel
+                text: 'Add Device'
+                size_hint: (1, 1)
+
+<ErrorMessagePopup>:
+    id: errorMessagePopup
+    title: 'Error'
+    size_hint: (0.5, 0.5)
+    BoxLayout:
+        id: errorMessagePopupBox
+        orientation: 'vertical'
+        size_hint: (1, 1)
+        Label:
+            id: errorMessagePopupLabel
+            text: 'Error message'
+            size_hint: (1, 1)
+        Button:
+            id: errorMessagePopupButton
+            text: 'OK'
+            size_hint: (1, 1)
+            on_press: root.dismiss()
+
 <SpookStationWidget>:
     orientation: "vertical"
     BoxLayout:
         canvas:
             Color:
-                rgba: .4, .7, .95, 1
+                rgba: .8, .8, .8, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
         orientation: "horizontal"
         size_hint: 1, None
         height: '48dp'
-        Image:
-            id: icon_1
-            width: '48dp'
-            size_hint_x: None
-            source: 'Images/fisk.png'
-            color: 'red'
-        Image:
-            id: icon_2
-            width: '48dp'
-            size_hint_x: None
-            source: 'Images/spook.png'
-            color: 'green'
-        Image:
-            id: icon_3
-            width: '48dp'
-            size_hint_x: None
-            source: 'Images/fisk.png'
-            color: 'white'
+        GridLayout:
+            id: leftIconGrid
+            orientation: "lr-tb"
+            rows: 1
+            size_hint: 1, 1
+
+            Image:
+                id: icon_1
+                width: '48dp'
+                size_hint_x: None
+                source: 'Images/fisk.png'
+                color: 'red'
+
+            Image:
+                id: icon_2
+                width: '48dp'
+                size_hint_x: None
+                source: 'Images/spook.png'
+                color: 'green'
+            
+            Image:
+                id: icon_3
+                width: '48dp'
+                size_hint_x: None
+                source: 'Images/fisk.png'
+                color: 'white'
+        
+        GridLayout:
+            id: rightIconGrid
+            orientation: "rl-tb"
+            rows: 1
+            size_hint: 1, 1
+
+            ImageButton:
+                id: manageDevicesButton
+                width: '48dp'
+                size_hint_x: None
+                source: 'Images/manage_devices.png'
+                color: 'white'
+                on_press: root.OnManageDevicesButtonPressed()
+    
     GridLayout:
         id: deviceList
         cols: 1
@@ -213,19 +565,3 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-    # ScrollView:
-    #     size_hint: (1, 1)
-    #     orientation: "vertical"
-    #     do_scroll_x: False
-    #     do_scroll_y: True
-    #     BoxLayout:
-    #         canvas:
-    #             Color:
-    #                 rgba: 0.67, 0.53, 0.8, 1
-    #             Rectangle:
-    #                 pos: self.pos
-    #                 size: self.size
-    #         id: deviceList
-    #         orientation: "vertical"
-    #         size_hint: (1, None)
-    #         height: self.minimum_height

@@ -36,6 +36,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Setup and start dummy audio output
       run: |
+        sudo apt-get update
         sudo apt-get install -y portaudio19-dev jackd2 libjack-jackd2-0 espeak
         jackd -d dummy -r 44100 &
     - name: Test with pytest

@@ -98,6 +98,7 @@ class SpookStationManager():
 
 	def __unSubscribeToTopics(self, device):
 		for topic in device.stateTopics:
+			self.debugPrint("Unsubscribing to: " + topic)
 			self.client.unsubscribe(topic)
 
 	def __getDeviceTypeFromName(self, deviceName: str):
@@ -179,6 +180,7 @@ class SpookStationManager():
 	def removeDevice(self, deviceName: str):
 		assert deviceName in self.devices.keys(), "Device not registered: " + deviceName
 		self.__unSubscribeToTopics(self.devices[deviceName])
+		self.devices[deviceName].destroy()
 		del self.devices[deviceName]
 
 	def getRegisteredDevices(self):

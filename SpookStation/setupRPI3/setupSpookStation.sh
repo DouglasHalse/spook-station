@@ -60,6 +60,9 @@ sudo cp setupConfigs/hostapd.conf /etc/hostapd/hostapd.conf
 # Copy mosquitto.conf
 sudo cp setupConfigs/mosquitto.conf /etc/mosquitto/conf.d/mosquitto.conf
 
+# Copy acl.acl
+sudo cp setupConfigs/acl.acl /etc/mosquitto/acl.acl
+
 # Restart mosquitto service
 sudo service mosquitto restart
 

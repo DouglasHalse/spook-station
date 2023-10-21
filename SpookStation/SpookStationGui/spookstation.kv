@@ -553,6 +553,52 @@
                 source: 'Images/manage_devices.png'
                 color: 'white'
                 on_press: root.OnManageDevicesButtonPressed()
+
+            GridLayout:
+                id: bytesReceivedGrid
+                cols:3
+                width: '96dp'
+                size_hint_x: None
+                Image:
+                    id: bytesReceivedImage
+                    width: '32dp'
+                    size_hint_x: None
+                    source: 'Images/downArrow.png'
+                    color: 'white'
+                Label:
+                    id: bytesReceivedLabel
+                    text: '0'
+                    size_hint: (1, 1)
+                    color: 'black'
+                    bold: True
+                Label:
+                    id: bytesReceivedTextLabel
+                    text: 'B/s'
+                    color: 'black'
+                    bold: True
+
+            GridLayout:
+                id: bytesSentGrid
+                cols:3
+                width: '96dp'
+                size_hint_x: None
+                Image:
+                    id: bytesSentImage
+                    width: '32dp'
+                    size_hint_x: None
+                    source: 'Images/upArrow.png'
+                    color: 'white'
+                Label:
+                    id: bytesSentLabel
+                    text: '0'
+                    size_hint: (1, 1)
+                    color: 'black'
+                    bold: True
+                Label:
+                    id: bytesSentTextLabel
+                    text: 'B/s'
+                    color: 'black'
+                    bold: True
     
     GridLayout:
         id: deviceList

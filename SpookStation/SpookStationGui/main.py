@@ -265,6 +265,14 @@ class SpookStationWidget(BoxLayout):
         super(SpookStationWidget, self).__init__(**kwargs)
         self.noAddedDeviceWidget = Image(source="Images/no-added-devices-background.png", allow_stretch=True, keep_ratio=False)
         self.ids.deviceList.add_widget(self.noAddedDeviceWidget)
+        deviceManager.bytesReceivedCallback = self.OnBytesReceivedChange
+        deviceManager.bytesSentCallback = self.OnBytesSentChange
+
+    def OnBytesReceivedChange(self, bytesReceived, *largs):
+        self.ids.bytesReceivedLabel.text = str(bytesReceived)
+
+    def OnBytesSentChange(self, bytesSent, *largs):
+        self.ids.bytesSentLabel.text = str(bytesSent)
 
     def AddNewDeviceInfoWidget(self, deviceType, deviceName):
         # If no added devices widget is in the list, remove it

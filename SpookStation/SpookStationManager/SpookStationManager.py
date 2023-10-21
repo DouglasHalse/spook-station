@@ -13,19 +13,28 @@ class SpookStationManager():
 		self.enableDebugPrints = enableDebugPrints
 		self.devices = dict()
 		self.useCyclicControlSignalPublishing = useCyclicControlSignalPublishing
+		self.shuttingDown = False
 
 		self.client = mqtt.Client(userdata="isSpookStation")
 		self.client.on_message = self.__on_message
-
+		self.client.on_connect = self._on_connect
 		self.client.connect_async("localhost", 1883, 60)
+
+		self.bytesReceivedTopic = "$SYS/broker/load/bytes/received/1min"
+		self.bytesReceivedCallback = None
+		self.bytesReceivedCurrent = None
+
+		self.bytesSentTopic = "$SYS/broker/load/bytes/sent/1min"
+		self.bytesSentCallback = None
+		self.bytesSentCurrent = None
+
+		self.systemTopics = [self.bytesReceivedTopic, self.bytesSentTopic]
 
 		self.client.loop_start()
 
-		if self.useCyclicControlSignalPublishing:
-			self.cyclicControlSignalPublishing()
-
 	def destroy(self):
 		print("SpookStationManager destructor called")
+		self.shuttingDown = True
 		self.useCyclicControlSignalPublishing = False
 		self.client.loop_stop()
 		self.client.disconnect()
@@ -44,7 +53,49 @@ class SpookStationManager():
 			thread.setName("SpookStationManagerCyclicControlSignalPublishing")
 			thread.start()
 
+	def cyclicBytesReceived(self):
+		if self.bytesReceivedCallback is not None:
+			self.bytesReceivedCallback(self.bytesReceivedCurrent)
+		if not self.shuttingDown:
+			thread = threading.Timer(1, self.cyclicBytesReceived)
+			thread.setName("SpookStationManagerCyclicBytesReceived")
+			thread.start()
+
+	def cyclicBytesSent(self):
+		if self.bytesSentCallback is not None:
+			self.bytesSentCallback(self.bytesSentCurrent)
+		if not self.shuttingDown:
+			thread = threading.Timer(1, self.cyclicBytesSent)
+			thread.setName("SpookStationManagerCyclicBytesSent")
+			thread.start()
+
+	def _on_connect(self, client, userdata, flags, rc):
+		if rc == 0:
+			self.debugPrint("Connected to broker")
+			for topic in self.systemTopics:
+				self.debugPrint("Subscribing to: " + topic)
+				self.client.subscribe(topic, options=SubscribeOptions(qos=2))
+			self.cyclicBytesSent()
+			self.cyclicBytesReceived()
+			if self.useCyclicControlSignalPublishing:
+				self.cyclicControlSignalPublishing()
+		else:
+			self.debugPrint("Failed to connect to broker, return code: " + str(rc))
+
 	def __on_message(self, client, userdata, msg):
+
+		if self.bytesReceivedTopic == msg.topic:
+			bytesPerSeconds = round(float(msg.payload.decode("utf-8"))/60, 2)
+			self.debugPrint("Broker bytes received: " + str(bytesPerSeconds) + " B/s")
+			self.bytesReceivedCurrent = bytesPerSeconds
+			return
+
+		if self.bytesSentTopic == msg.topic:
+			bytesPerSeconds = round(float(msg.payload.decode("utf-8"))/60, 2)
+			self.debugPrint("Broker bytes sent: " + str(bytesPerSeconds) + " B/s")
+			self.bytesSentCurrent = bytesPerSeconds
+			return
+
 		deviceName, deviceTopic = msg.topic.split("/")
 
 		assert deviceName in self.devices.keys(), "Received message for unknown device: " + deviceName
@@ -89,11 +140,11 @@ class SpookStationManager():
 			print("Message for unknown device: " + deviceName)
 
 	def __subscribeToTopics(self, device):
+		self.client.loop_stop()
 		for topic in device.stateTopics:
 			self.debugPrint("Subscribing to: " + topic)
-			self.client.loop_stop()
 			self.client.subscribe(topic, options=SubscribeOptions(qos=2))
-			self.client.loop_start()
+		self.client.loop_start()
 
 
 	def __unSubscribeToTopics(self, device):

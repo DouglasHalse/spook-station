@@ -36,7 +36,10 @@ class EMFReaderMQTTClientEmulator():
 	def _on_message(self, client, userdata, msg):
 		if msg.topic == self.desiredStateTopic:
 			self.debugPrint("Setting current state to " + str(msg.payload.decode()))
-			self.currentState = int(msg.payload)
+			desiredState = int(msg.payload)
+			# Clamp desired state to 0-4
+			constrainedDesiredState = max(min(4, desiredState), 0)
+			self.currentState = constrainedDesiredState
 		elif msg.topic == self.desiredUseSoundTopic:
 			self.debugPrint("Setting current use sound to " + str(msg.payload.decode()))
 			useSoundString = msg.payload.decode()
@@ -46,6 +49,8 @@ class EMFReaderMQTTClientEmulator():
 				self.currentUseSound = False
 
 	def cyclicStatePublishing(self):
+		self.debugPrint("Publishing current state " + str(self.currentState))
 		self.MQTTClient.publish(self.currentStateTopic, self.currentState)
+		self.debugPrint("Publishing current use sound " + str(self.currentUseSound))
 		self.MQTTClient.publish(self.currentUseSoundTopic, self.currentUseSound)
 		threading.Timer(0.05, self.cyclicStatePublishing).start()

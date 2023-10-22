@@ -30,3 +30,20 @@ def spirit_box_test_setup():
     time.sleep(1)
     yield dm, mockSpiritBox
     dm.destroy()
+
+
+@pytest.fixture(scope="module")
+def emfreader_test_setup():
+    sys.path.append(os.path.join(sys.path[0], '..', 'Devices', 'EMFReader', 'pythonEmulator'))
+    sys.path.append(os.path.join(sys.path[0], '..', 'SpookStation', 'SpookStationManager'))
+    from EMFReaderMQTTClientEmulator import EMFReaderMQTTClientEmulator
+    from SpookStationManager import SpookStationManager
+    from SpookStationManagerEnums import SpookStationDeviceType
+    dm = SpookStationManager(enableDebugPrints=True)
+    mockEMFReaderName = "MockEMFReader"
+    dm.addDevice(mockEMFReaderName, SpookStationDeviceType.EMFReader)
+    time.sleep(1)
+    mockEMFReader = EMFReaderMQTTClientEmulator(deviceName=mockEMFReaderName, ipAddress="localhost", enableDebugPrints=True)
+    time.sleep(1)
+    yield dm, mockEMFReader
+    dm.destroy()

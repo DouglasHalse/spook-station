@@ -36,11 +36,12 @@ class SpookStationManager():
 		print("SpookStationManager destructor called")
 		self.shuttingDown = True
 		self.useCyclicControlSignalPublishing = False
-		self.client.loop_stop()
-		self.client.disconnect()
 		for device in self.devices.values():
 			device.destroy()
-		del self.client
+		self.client.loop_stop()
+		self.client.disconnect()
+		
+		#del self.client
 	
 	def debugPrint(self, text: str):
 		if self.enableDebugPrints:

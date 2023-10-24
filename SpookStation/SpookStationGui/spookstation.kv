@@ -2,10 +2,18 @@
 
 <EMFReaderWidget>:
     size_hint: (1,1)
+    canvasOpacity: 0.5
+    canvas.after:
+        Color:
+            rgba: 0, 0, 0, self.canvasOpacity
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         id: ledbox
         orientation: 'vertical'
         size_hint: (.7, 1)
+        padding: 10
         BoxLayout:
             id: ledIndicator
             orientation: 'horizontal'
@@ -158,13 +166,13 @@
     orientation: 'vertical'
     size_hint: (None, 1)
     width: '96dp'
+    padding: 10
 
 <DeviceRowWidget>:
     orientation: 'horizontal'
     size_hint_min: (1, 0.7)
     size_hint: (1, None)
     height: '96dp'
-    padding: 5
     canvas:
         Color:
             rgba: 0.2, 0.2, 0.2, 1

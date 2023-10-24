@@ -15,7 +15,7 @@ from SpookStationManager import SpookStationManager
 from SpookStationManagerEnums import SpookStationDeviceType, SpookStationDeviceConnectionState, SpookStationSignalType, SpookStationDeviceTypeToString, SpookStationDeviceStringToType
 from enum import Enum
 
-deviceManager = SpookStationManager(enableDebugPrints=True, useCyclicControlSignalPublishing=False)
+deviceManager = SpookStationManager(enableDebugPrints=True, useCyclicControlSignalPublishing=True)
 
 
 def verifyDeviceName(deviceName: str):
@@ -52,6 +52,7 @@ class EMFReaderWidget(BoxLayout):
             self.ids['led' + str(led)].canvas.opacity = .5
         deviceManager.devices[deviceName].setOnStateChangeCallback(self.SetLedState)
         deviceManager.devices[deviceName].setOnUseSoundChangeCallback(self.SetUseSound)
+        self.canvasOpacity = 0
 
     def OnLedNumChanged(self, numLed):
         numLed = int(numLed)
@@ -94,9 +95,18 @@ class GenericDeviceWidget(BoxLayout):
         super().__init__(**kwargs)
         if deviceType == SpookStationDeviceType.EMFReader:
             self.deviceWidget = EMFReaderWidget(deviceName=deviceName)
+            self.setGrayedOut(grayedOut=True)
             self.add_widget(self.deviceWidget)
         else:
             print("Unsupported Device Type: " + str(deviceType))
+
+    def setGrayedOut(self, grayedOut: bool):
+        if grayedOut:
+            self.deviceWidget.canvasOpacity = .5
+            self.deviceWidget.disabled = True
+        else:
+            self.deviceWidget.canvasOpacity = 0
+            self.deviceWidget.disabled = False
 
 
 class BaseDeviceInfoLableWidget(BoxLayout):
@@ -106,9 +116,8 @@ class BaseDeviceInfoLableWidget(BoxLayout):
 
 
 class BaseDeviceConnectionIndicatorWidget(BoxLayout):
-    def __init__(self, deviceName: str, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        deviceManager.devices[deviceName].setOnConnectionStateChangeCallback(self.ConnectionStateChangeCallback)
  
     def SetColor(self, state: SpookStationDeviceConnectionState, *largs):
         if state == SpookStationDeviceConnectionState.Disconnected:
@@ -120,16 +129,13 @@ class BaseDeviceConnectionIndicatorWidget(BoxLayout):
         else:
             print("Unsupported Device state: " + state)
 
-    def ConnectionStateChangeCallback(self, state: SpookStationDeviceConnectionState):
-        Clock.schedule_once(partial(self.SetColor, state), -1)
-
 
 class BaseDeviceInfoWidget(BoxLayout):
     def __init__(self, deviceName: str, **kwargs):
         super().__init__(**kwargs)
         self.labelWidget = BaseDeviceInfoLableWidget(deviceName=deviceName)
         self.add_widget(self.labelWidget)
-        self.indicatorWidget = BaseDeviceConnectionIndicatorWidget(deviceName=deviceName)
+        self.indicatorWidget = BaseDeviceConnectionIndicatorWidget()
         self.add_widget(self.indicatorWidget)
 
 
@@ -140,6 +146,14 @@ class DeviceRowWidget(BoxLayout):
         self.add_widget(self.baseDeviceInfoWidget)
         self.genericDeviceWidget = GenericDeviceWidget(deviceType=deviceType, deviceName=deviceName)
         self.add_widget(self.genericDeviceWidget)
+        deviceManager.devices[deviceName].setOnConnectionStateChangeCallback(self.ConnectionStateChangeCallback)
+
+    def ConnectionStateChangeCallback(self, state: SpookStationDeviceConnectionState):
+        Clock.schedule_once(partial(self.baseDeviceInfoWidget.indicatorWidget.SetColor, state), -1)
+        if state == SpookStationDeviceConnectionState.Disconnected:
+            self.genericDeviceWidget.setGrayedOut(grayedOut=True)
+        else:
+            self.genericDeviceWidget.setGrayedOut(grayedOut=False)
 
     def Remove(self):
         self.parent.remove_widget(self)

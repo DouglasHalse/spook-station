@@ -4,20 +4,20 @@ from SpookStationManagerDevices.SpookStationManagerDeviceUtil import SpookStatio
 import random, time, threading
 
 class SpookStationManagerDeviceEMFReader(SpookStationDeviceBase):
-    def __init__(self, deviceName: str) -> None:
+    def __init__(self, deviceName: str, useDebugPrints: bool = False) -> None:
         super().__init__(deviceName, SpookStationDeviceType.EMFReader)
         self.state = SpookStationSignal(name="state", 
                                         MQTTStateTopic=deviceName + "/current_state", 
                                         MQTTControlTopic=deviceName + "/desired_state", 
                                         deviceName=deviceName, 
                                         initialValue=0, 
-                                        enableDebugPrints=self.enableDebugPrints)   
+                                        enableDebugPrints=useDebugPrints)   
         self.useSound = SpookStationSignal(name="useSound", 
                                            MQTTStateTopic=deviceName + "/current_use_sound", 
                                            MQTTControlTopic=deviceName + "/desired_use_sound", 
                                            deviceName=deviceName, 
                                            initialValue=False, 
-                                           enableDebugPrints=self.enableDebugPrints)
+                                           enableDebugPrints=useDebugPrints)
         self.currentStateChangeCallback = None
         self.currentUseSoundChangeCallback = None
         self.fluctuationRate = 0

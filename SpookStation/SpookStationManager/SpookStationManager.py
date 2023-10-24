@@ -162,8 +162,10 @@ class SpookStationManager():
 			if device.deviceType == SpookStationDeviceType.EMFReader:
 				# Publish EMFReader state
 				stateWithFluctuation = device.getDesiredStateWithFluctuation()
-				self.client.publish(device.state.controlTopic, stateWithFluctuation, qos=2)
-				self.debugPrint("Publishing desired state: " + str(stateWithFluctuation) + " for " + device.deviceName)
+				if device.state.hasChanged(signalType=SpookStationSignalType.Control) or stateWithFluctuation != device.state.getValue(signalType=SpookStationSignalType.State):
+					device.state.resetHasChanged(signalType=SpookStationSignalType.Control)
+					self.client.publish(device.state.controlTopic, stateWithFluctuation, qos=2)
+					self.debugPrint("Publishing desired state: " + str(stateWithFluctuation) + " for " + device.deviceName)
 				
 				# Publish EMFReader useSound
 				if device.useSound.hasChanged(signalType=SpookStationSignalType.Control):
@@ -223,7 +225,7 @@ class SpookStationManager():
 	def addDevice(self, deviceName: str, deviceType: SpookStationDeviceType):
 		assert deviceName not in self.devices.keys(), "Device already registered: " + deviceName
 		if deviceType == SpookStationDeviceType.EMFReader:
-			device = SpookStationManagerDeviceEMFReader(deviceName)
+			device = SpookStationManagerDeviceEMFReader(deviceName, self.enableDebugPrints)
 		elif deviceType == SpookStationDeviceType.SpiritBox:
 			device = SpookStationManagerDeviceSpiritbox(deviceName)
 		self.devices[deviceName] = device

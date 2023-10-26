@@ -54,6 +54,15 @@ class EMFReaderWidget(BoxLayout):
         deviceManager.devices[deviceName].setOnUseSoundChangeCallback(self.SetUseSound)
         self.canvasOpacity = 0
 
+        # Make button groups unique
+        self.ids.fluctuationButton0.group = "fluctuationButtonGroup" + deviceName
+        self.ids.fluctuationButton1.group = "fluctuationButtonGroup" + deviceName
+        self.ids.fluctuationButton2.group = "fluctuationButtonGroup" + deviceName
+        self.ids.fluctuationRateButton0.group = "fluctuationRateButtonGroup" + deviceName
+        self.ids.fluctuationRateButton1.group = "fluctuationRateButtonGroup" + deviceName
+        self.ids.fluctuationRateButton2.group = "fluctuationRateButtonGroup" + deviceName
+
+    
     def OnLedNumChanged(self, numLed):
         numLed = int(numLed)
         deviceManager.devices[self.deviceName].state.setValue(numLed, signalType=SpookStationSignalType.Control)

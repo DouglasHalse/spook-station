@@ -109,17 +109,20 @@
             size_hint: (1,1)
             orientation: 'horizontal'
             ToggleButton:
+                id: fluctuationButton0
                 text: '0'
                 group: 'fluctuationMagnitudeButton'
                 state: 'down'
                 allow_no_selection: False
                 on_press: root.OnFluctuationMagnitudeChanged(0)
             ToggleButton:
+                id: fluctuationButton1
                 text: '1'
                 group: 'fluctuationMagnitudeButton'
                 allow_no_selection: False
                 on_press: root.OnFluctuationMagnitudeChanged(1)
             ToggleButton:
+                id: fluctuationButton2
                 text: '2'
                 group: 'fluctuationMagnitudeButton'
                 allow_no_selection: False
@@ -128,17 +131,20 @@
             size_hint: (1,1)
             orientation: 'horizontal'
             ToggleButton:
+                id: fluctuationRateButton0
                 text: 'L'
                 group: 'fluctuationRateButton'
                 state: 'down'
                 allow_no_selection: False
                 on_press: root.OnFluctuationRateChanged(0)
             ToggleButton:
+                id: fluctuationRateButton1
                 text: 'M'
                 group: 'fluctuationRateButton'
                 allow_no_selection: False
                 on_press: root.OnFluctuationRateChanged(1)
             ToggleButton:
+                id: fluctuationRateButton2
                 text: 'H'
                 group: 'fluctuationRateButton'
                 allow_no_selection: False

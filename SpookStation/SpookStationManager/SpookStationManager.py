@@ -22,11 +22,11 @@ class SpookStationManager():
 
 		self.bytesReceivedTopic = "$SYS/broker/load/bytes/received/1min"
 		self.bytesReceivedCallback = None
-		self.bytesReceivedCurrent = None
+		self.bytesReceivedCurrent = 0
 
 		self.bytesSentTopic = "$SYS/broker/load/bytes/sent/1min"
 		self.bytesSentCallback = None
-		self.bytesSentCurrent = None
+		self.bytesSentCurrent = 0
 
 		self.systemTopics = [self.bytesReceivedTopic, self.bytesSentTopic]
 

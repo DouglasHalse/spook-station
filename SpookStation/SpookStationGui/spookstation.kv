@@ -564,8 +564,8 @@
 
             GridLayout:
                 id: bytesReceivedGrid
-                cols:3
-                width: '96dp'
+                cols:2
+                width: '130dp'
                 size_hint_x: None
                 Image:
                     id: bytesReceivedImage
@@ -575,20 +575,15 @@
                     color: 'white'
                 Label:
                     id: bytesReceivedLabel
-                    text: '0'
+                    text: '0 B/s'
                     size_hint: (1, 1)
-                    color: 'black'
-                    bold: True
-                Label:
-                    id: bytesReceivedTextLabel
-                    text: 'B/s'
                     color: 'black'
                     bold: True
 
             GridLayout:
                 id: bytesSentGrid
-                cols:3
-                width: '96dp'
+                cols:2
+                width: '130dp'
                 size_hint_x: None
                 Image:
                     id: bytesSentImage
@@ -598,13 +593,8 @@
                     color: 'white'
                 Label:
                     id: bytesSentLabel
-                    text: '0'
+                    text: '0 B/s'
                     size_hint: (1, 1)
-                    color: 'black'
-                    bold: True
-                Label:
-                    id: bytesSentTextLabel
-                    text: 'B/s'
                     color: 'black'
                     bold: True
     

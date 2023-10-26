@@ -283,10 +283,20 @@ class SpookStationWidget(BoxLayout):
         deviceManager.bytesSentCallback = self.OnBytesSentChange
 
     def OnBytesReceivedChange(self, bytesReceived, *largs):
-        self.ids.bytesReceivedLabel.text = str(bytesReceived)
+        self.ids.bytesReceivedLabel.text = self.BytesToHumanReadable(bytesReceived)
 
     def OnBytesSentChange(self, bytesSent, *largs):
-        self.ids.bytesSentLabel.text = str(bytesSent)
+        self.ids.bytesSentLabel.text = self.BytesToHumanReadable(bytesSent)
+
+    def BytesToHumanReadable(self, bytes):
+        if bytes < 1024:
+            return str(round(bytes)) + " B/s"
+        elif bytes < 1024**2:
+            return str(round(bytes / 1024, 1)) + " KB/s"
+        elif bytes < 1024**3:
+            return str(round(bytes / 1024**2, 1)) + " MB/s"
+        else:
+            return str(round(bytes / 1024**3, 1)) + " GB/s"
 
     def AddNewDeviceInfoWidget(self, deviceType, deviceName):
         # If no added devices widget is in the list, remove it

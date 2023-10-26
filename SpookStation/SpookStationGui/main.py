@@ -291,13 +291,13 @@ class SpookStationWidget(BoxLayout):
         deviceManager.bytesReceivedCallback = self.OnBytesReceivedChange
         deviceManager.bytesSentCallback = self.OnBytesSentChange
 
-    def OnBytesReceivedChange(self, bytesReceived, *largs):
+    def OnBytesReceivedChange(self, bytesReceived: int, *largs):
         self.ids.bytesReceivedLabel.text = self.BytesToHumanReadable(bytesReceived)
 
-    def OnBytesSentChange(self, bytesSent, *largs):
+    def OnBytesSentChange(self, bytesSent: int, *largs):
         self.ids.bytesSentLabel.text = self.BytesToHumanReadable(bytesSent)
 
-    def BytesToHumanReadable(self, bytes):
+    def BytesToHumanReadable(self, bytes: int) -> str:
         if bytes < 1024:
             return str(round(bytes)) + " B/s"
         elif bytes < 1024**2:

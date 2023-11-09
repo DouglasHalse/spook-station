@@ -1,5 +1,7 @@
 echo off
 
+cd /D "%~dp0"
+
 REM Prompt for admin privileges
 NET FILE >NUL 2>NUL
 if '%errorlevel%' == '0' (
@@ -9,6 +11,13 @@ if '%errorlevel%' == '0' (
     pause
     exit /b 1
 )
+
+REM Check if venv already exists
+if exist %~dp0venv\ (
+    echo "Please delete the existing venv folder and run this script again."
+    pause
+    exit /b 1
+) 
 
 REM Check if mosquitto service is installed
 sc query mosquitto >nul
@@ -57,12 +66,6 @@ echo topic read $SYS/# >> "%mosquitto_exe_folder%acl.acl"
 REM Start mosquitto service
 net start mosquitto
 
-REM Remove old venv folder
-if exist %~dp0venv\ (
-    echo "Deleting existing venv folder..."
-    rd /s /q %~dp0venv\
-) 
-
 python -m pip install --upgrade pip setuptools virtualenv
 
 REM Create a virtual environment and activate it
@@ -79,9 +82,6 @@ if "%VIRTUAL_ENV%" == "" (
 REM Install the required packages
 %~dp0venv\Scripts\python.exe -m pip install --upgrade pip
 %~dp0venv\Scripts\python.exe -m pip install -r requirements.txt
-
-REM deactivate the virtual environment
-deactivate
 
 echo:
 echo "If you wish to run the GUI from Visual studio code, select the interpreter from the venv folder"

@@ -327,6 +327,9 @@ class SpookStationWidget(BoxLayout):
         manageDevicesPopup = ManageDevicesPopup(spookStationWidget=self)
         manageDevicesPopup.open()
 
+    def displayaboutpopup(self):
+        popup = AboutPopup()
+        popup.open()
 
 class SpookStationApp(App):
     def build(self):
@@ -337,6 +340,9 @@ class SpookStationApp(App):
         deviceManager.destroy()
         return super().on_stop()
 
+class AboutPopup(Popup):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 if __name__ == '__main__':
     SpookStationApp().run()

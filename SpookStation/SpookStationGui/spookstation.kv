@@ -532,28 +532,12 @@
             orientation: "lr-tb"
             rows: 1
             size_hint: 1, 1
-
-            Image:
-                id: icon_1
-                width: '48dp'
-                size_hint_x: None
-                source: 'Images/fisk.png'
-                color: 'red'
-
-            Image:
-                id: icon_2
-                width: '48dp'
-                size_hint_x: None
-                source: 'Images/spook.png'
-                color: 'green'
-            
-            Image:
-                id: icon_3
-                width: '48dp'
-                size_hint_x: None
-                source: 'Images/fisk.png'
+            ImageButton:
+                source: 'Images/ghost_happy.png'
                 color: 'white'
-        
+                width: '48dp'
+                size_hint_x: None
+                on_press: root.displayaboutpopup()
         GridLayout:
             id: rightIconGrid
             orientation: "rl-tb"
@@ -615,3 +599,55 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+
+<AboutPopup@Popup>:
+    size_hint:(0.8, 0.8)
+    auto_dismiss: True
+    title: "About"
+    BoxLayout:
+        center_x:(True)
+        orientation: "vertical"
+        size_hint:(1, 1)
+        canvas:
+            Color:
+                rgba: 0, 0.3, 0, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            orientation: "vertical"
+            size_hint:(1, .9)
+            canvas:
+                Color:
+                    rgba: 0.1, 0.1, 0.1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            Label:
+                text_size: self.size
+                padding: 10
+                halign: 'center'
+                valign: 'middle'
+                text: 'This is Spook Station, a role-playing ghost-hunting tool. Its developed for game organizers (or Dungeon masters) to enhance the game experience to the next level by remotely activating and controlling connected ghost-hunting equipment.'
+            Label:
+                text_size: self.size
+                markup: True
+                halign: 'center'
+                valign: 'middle'
+                text: '[b]Contributers[/b] \nDouglas Halse - Project Manager \nEmil Gårdh - User Interface \nRasmus Strångert - User Interface \nOlle Skog - Art Resource \nInga Lindow - Art Resource \nLinnéa Gistrand - User Interaction'     
+            
+            BoxLayoutButton:
+                size_hint: (None, None)
+                height: '30dp'
+                width: '130dp'
+                on_press: root.dismiss()
+                canvas:
+                    Color:
+                        rgba: 0.4, 0.4, 0.4, 1.0
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                
+                Label:
+                    text: 'Close'
+                    size_hint: (1, 1)
